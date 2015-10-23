@@ -1,0 +1,2 @@
+# checkpoints
+Python curriculum checkpoints
