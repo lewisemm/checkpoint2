@@ -1,29 +1,14 @@
 from living import Living
 from office import Office
 import utilities
-		
-# Populating Amity with 20 spaces (10 living, 10 office)
+from amity import Amity
+from fellow import Fellow
 
-# Ten empty living spaces
-living = [None] * 10
+campus = Amity()
 
-# Ten empty office spaces
-offices = [None] * 10
+# Populating (10 living, 10 office)
+campus.prePopulate(10, 10)
 
-# Naming the rooms
-counter = 1
-
-for counter in range( len(living)):
-	living[counter] = Living()
-	living[counter].setName('Room ' +  str(counter + 1) )
-
-	offices[counter] = Office()
-	offices[counter].setName('Office ' + str(counter + 1) )
-
-	counter += 1
-
-# Amity has 20 unoccupied rooms in total
-amity = [living, offices]
 
 # useeful vars
 allocator = '1. Allocate people to rooms.'
@@ -97,7 +82,7 @@ while (True):
 							print rangeError, ' 0 - 2 *** \n'
 							continue
 
-					except:
+					except ValueError:
 						utilities.clearScreen()
 						print valueError
 
@@ -146,7 +131,20 @@ while (True):
 										break;
 									elif (choice == 1):
 										# allocate via app
-										utilities.fellowAppAllocating()
+										utilities.clearScreen()
+
+										while (True):
+
+											name = raw_input('Enter the name of the fellow: \n')
+
+											if name:
+												fellow = Fellow()
+												fellow.setName(name)
+
+												campus.allocate(fellow, 'Living')
+												break
+
+										
 										
 									elif (choice == 2):
 										# allocate via text file
