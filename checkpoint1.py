@@ -1,86 +1,5 @@
-overcapacity = 'The room is filled to capacity!'
-
-# Room is the superclass to Living and Office
-# Every room has a name
-class Room:
-
-	def setName(self, name):
-		self.name = name
-
-	def getName(self):
-		return self.name
-
-# Living spaces have a default maximum of 4 people
-# Only fellows can occupy living spaces
-class Living(Room):
-
-	def getMax(self):
-		self.max = 4
-		return self.max
-
-	def addFellow(self, fellow):
-		if isinstance(fellow, Fellow):
-			if ( len(self.occupants) < self.max):
-				self.occupants.append(fellow)
-			else:
-				print overcapacity
-		else:
-			print 'Living spaces are meant for Fellows only!'
-
-# Office spaces have a default maximum of 6 people
-class Office(Room):
-
-	def getMax(self):
-		self.max = 6
-		return self.max
-
-	def addPeople(self, person):
-		if isinstance(person, Person):
-			if ( len(self.occupants) <= self.max):
-				self.occupants.append(person)
-			else:
-				print overcapacity
-		else:
-			print 'Office spaces are meant to be allocated to people (Staff & Fellows)'
-
-# Person is the superclass to Staff and Fellow
-# Every person has a name and gender
-class Person:
-	def setName(self, name):
-		self.name = name
-	
-	def getName(self):
-		return self.name
-
-	def setGender(self, gender):
-		self.gender = gender
-
-	def getGender(self):
-		return self.gender
-
-
-# Fellow has the option to board
-class Fellow(Person):
-
-	def setBoarding(self, option):
-		self.option = option
-
-	def isBoarding(self):
-		return self.option
-
-
-# Staff cannot be allocated a living space
-# but can be allocated an office
-class Staff(Person):
-	
-	def isBoarding(self):
-		return False;
-
-	def setOffice(self, office):
-		self.office = office;
-		
-	def getOffice(self):
-		return self.office;
+from living import Living
+from office import Office
 		
 # Populating Amity with 20 spaces (10 living, 10 office)
 
@@ -104,6 +23,44 @@ for counter in range( len(living)):
 
 # Amity has 20 unoccupied rooms in total
 amity = [living, offices]
+
+# User Menu
+answer = 0
+while (not answer):
+	print '-' * 80
+	print '-' * 40, ' MENU ', '-' * 34
+	print '-' * 80
+	print '1. Allocate people to rooms.'
+	print '2. Get list of allocations.'
+	print '3. Print allocation list.'
+	print '4. List unallocated people.'
+	print '5. List people in a room.'
+	print '-' * 80
+	print '-' * 80
+	answer = raw_input('Enter a number between 1 - 5 to choose. Enter Q (in caps) to quit. \n')
+
+# Handling input from user at the menu
+if ( answer == 'Q'):
+	print 'Thank you for using this product. Goodbye.'
+elif ( (answer >= 'A') or (answer <='z')):
+	print 'Please choose between 1 - 5 or Q'
+else:
+	if ( int(answer) == 1):
+		# sub menu
+		pass
+	elif ( int(answer) == 2):
+		# get list of allocations
+		pass
+	elif ( int(answer) == 3):
+		# print allocation list
+		pass
+	elif ( int(answer) == 4):
+		# list unallocated people
+		pass
+	elif ( int(answer) == 5):
+		# sub menu
+		pass
+
 
 
 
