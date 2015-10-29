@@ -105,11 +105,53 @@ while (True):
 
 						if (alloc == 0):
 							utilities.clearScreen()
-							print 'Exiting ', allocator, ' menu...'
+							print 'Exiting ***', allocator, '*** MENU ... \n'
 							break
 						elif (alloc == 1):
 							# allocate fellow
-							pass
+
+							utilities.clearScreen()
+							header = ' ALLOCATION METHOD '
+
+							while(True):
+								print '-' * 80
+								print '-' * 40, header, '-' * (40 - len(header))
+								print '-' * 80
+								print ' ' * 80
+								print '1. Allocate through the app'
+								print '2. Allocate through text file'
+								print ' ' * 80
+								print '0. Exit sub-menu'
+								print ' ' * 80
+								print '-' * 80
+
+								choice = raw_input('Enter a number between 0 - 2 to select a manu \n')
+
+								try:
+									choice = int(choice)
+
+									if ( (choice < 0) or (choice > 2)):
+										utilities.clearScreen()
+										print rangeError, ' 0 - 2 *** \n'
+										continue
+
+								except:
+									utilities.clearScreen()
+									print valueError
+
+								else:
+									if (choice == 0):
+										utilities.clearScreen()
+										print 'Exiting *** ', header, ' MENU *** \n'
+										break;
+									elif (choice == 1):
+										# allocate via app
+										utilities.fellowAppAllocating()
+										
+									elif (choice == 2):
+										# allocate via text file
+										pass
+							
 						elif (alloc == 2):
 							# allocate staff
 							pass
