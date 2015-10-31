@@ -33,3 +33,6 @@ class Living(room.Room):
 		else:
 
 			raise TypeError('Living spaces are meant for Fellows only!')
+
+	def getOccupants(self):
+		return self.occupants
