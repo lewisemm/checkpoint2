@@ -36,6 +36,15 @@ class Amity:
 				anOfficeRoom.setName(line[1::])
 				self.officeRooms.append(anOfficeRoom)
 
+			elif (line[0] == '\t'):
+				# insert these people at the lastIndex
+				lastIndex = len(self.livingRooms) - 1
+
+				# Create a fellow object from the name on the file
+				fellow = Fellow(line[1::])
+				self.livingRooms[lastIndex].addFellow(fellow)
+
+
 		allocation.close()
 
 

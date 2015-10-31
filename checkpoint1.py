@@ -6,8 +6,8 @@ from fellow import Fellow
 
 campus = Amity()
 
-# Populating (10 living, 10 office)
-campus.prePopulate(10, 10)
+# Populating from data/allocation.txt
+campus.prePopulate()
 
 
 # useeful vars
@@ -120,7 +120,7 @@ while (True):
 										print rangeError, ' 0 - 2 *** \n'
 										continue
 
-								except:
+								except ValueError:
 									utilities.clearScreen()
 									print valueError
 
@@ -138,8 +138,7 @@ while (True):
 											name = raw_input('Enter the name of the fellow: \n')
 
 											if name:
-												fellow = Fellow()
-												fellow.setName(name)
+												fellow = Fellow(name)
 
 												campus.allocate(fellow, 'Living')
 												break
