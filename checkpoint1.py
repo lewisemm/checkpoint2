@@ -245,9 +245,54 @@ while (True):
 			elif ( answer == 2):
 				# get list of allocations
 				pass
+
 			elif ( answer == 3):
 				# print allocation list
-				pass
+
+				utilities.clearScreen()
+				
+				allocations = open('data/allocated.txt')
+
+				for lines in allocations.readlines():
+
+					if lines[0:-1] == 'Living':
+
+						# A header (visual separator)
+						print 'Living Spaces (Fellows Only) \n', '-' * 80, '\n'
+
+					elif lines[0] == '+':
+
+						# The name of a living space
+						print lines[1::]
+						print '-' * 40
+
+					elif lines[0] == '\t' and lines[1] != '>' and lines[1] != '#':
+						# if it starts with a tab and it's not an office allocation
+
+						print '\t', lines[1::]
+
+					elif lines[0:-1] == 'Office':
+
+						print '\n\n', 'Office Spaces \n', '-' * 80, '\n'
+
+					elif lines[0] == '-':
+
+						# The name of an office space
+						print lines[1::], '\n', '-' * 40
+
+					elif lines[0] == '\t' and lines[1] == '>':
+
+						# Staff members in offices
+						print '\t (S): ', lines[2::]
+
+					elif lines[0] == '\t' and lines[1] == '#':
+
+						# Fellows in offices
+						print '\t (F): ', lines[2::]
+
+
+
+
 			elif ( answer == 4):
 				# list unallocated people
 				pass
