@@ -3,6 +3,7 @@ from office import Office
 import utilities
 from amity import Amity
 from fellow import Fellow
+from staff import Staff
 
 campus = Amity()
 
@@ -11,25 +12,13 @@ campus.prePopulate()
 
 
 # useeful vars
-allocator = '1. Allocate people to rooms.'
 rangeError = 'Range error: *** Please select a number that is within the range'
 valueError = 'Value error: *** Please enter a number in digit form ***\n'
 
 # User Menu
 while (True):
-	print '-' * 80
-	print '-' * 40, ' MAIN MENU ', '-' * 28
-	print '-' * 80
-	print ' ' * 80
-	print allocator
-	print '2. Get list of allocations.'
-	print '3. Print allocation list.'
-	print '4. List unallocated people.'
-	print '5. List people in a room.'
-	print ' ' * 80
-	print '0. Quit application.'
-	print ' ' * 80
-	print '-' * 80
+
+	utilities.mainMenu()
 
 	answer = raw_input('Enter a number between 0 - 5 to select a menu.\n')
 
@@ -48,110 +37,210 @@ while (True):
 		print valueError
 
 	else:
-		# Handling input from user at the menu
 		if ( answer == 0):
+
 			print 'Thank you for using this product. Goodbye. \n\n'
+
 			break
 
 		else:
 
 			if ( answer == 1):
-				# sub menu: either staff or fellow allocation
+				# Allocate people to rooms
 
 				utilities.clearScreen()
 
-				while(True):
-					print '-' * 80
-					print '-' * 40, allocator, '-' * (40 - len(allocator) )
-					print '-' * 80
-					print ' ' * 80
-					print '1. Allocate Fellow'
-					print '2. Allocate Staff'
-					print ' ' * 80
-					print '0. Quit sub-menu'
-					print ' ' * 80
-					print '-' * 80
+				while (True):
 
-					alloc = raw_input('Enter a number between 0 - 2 to select a menu \n')
+					# Choose either staff or fellow
+					utilities.choosePersonMenu()
+
+					chosen = raw_input('Enter a number between 0 - 2 to select a menu.\n')
 
 					try:
-						alloc = int(alloc)
-						
-						if ( (alloc < 0) or (alloc > 2)):
+						# catch non integer input from the user
+						chosen = int(chosen)
+
+						# catch int that are outside the range in the menu
+						if ( (chosen < 0) or (chosen > 2) ):
+
 							utilities.clearScreen()
-							print rangeError, ' 0 - 2 *** \n'
+
+							print rangeError, ' 0 - 5 ***\n'
+
 							continue
 
 					except ValueError:
+
 						utilities.clearScreen()
+
 						print valueError
 
 					else:
 
-						if (alloc == 0):
-							utilities.clearScreen()
-							print 'Exiting ***', allocator, '*** MENU ... \n'
+						if (chosen == 0):
+
+							# quit this menu
 							break
-						elif (alloc == 1):
-							# allocate fellow
 
+						elif (chosen == 1):
+
+							# Allocating staff (offices only)
 							utilities.clearScreen()
-							header = ' ALLOCATION METHOD '
 
-							while(True):
-								print '-' * 80
-								print '-' * 40, header, '-' * (40 - len(header))
-								print '-' * 80
-								print ' ' * 80
-								print '1. Allocate through the app'
-								print '2. Allocate through text file'
-								print ' ' * 80
-								print '0. Exit sub-menu'
-								print ' ' * 80
-								print '-' * 80
+							# Select app or text file data entry option
+							utilities.appOrTextFileMenu()
 
-								choice = raw_input('Enter a number between 0 - 2 to select a manu \n')
+							how = raw_input('Enter a number between 0 - 2 to select a menu \n')
 
-								try:
-									choice = int(choice)
+							try:
 
-									if ( (choice < 0) or (choice > 2)):
-										utilities.clearScreen()
-										print rangeError, ' 0 - 2 *** \n'
-										continue
+								how = int(how)
+						
+								if ( (how < 0) or (how > 2)):
 
-								except ValueError:
 									utilities.clearScreen()
-									print valueError
 
-								else:
-									if (choice == 0):
+									print rangeError, ' 0 - 2 *** \n'
+
+									continue
+
+							except ValueError:
+
+								utilities.clearScreen()
+
+								print valueError
+
+							else:
+
+								if (how == 0):
+
+									# Quit this menu
+									break
+
+								elif (how == 1):
+
+									while (True):
+
+										staffName = raw_input('Enter the name of the staff member. \n')
+
+										if staffName:
+
+											worker = Staff(staffName)
+
+											campus.allocate(worker, 'Office')
+
+											break
+
+								elif (how == 2):
+
+									#figure out how to read from file
+									pass
+
+						elif (chosen == 2):
+
+							# Allocating fellows
+							utilities.clearScreen()
+
+							# Select the method for data input
+							utilities.appOrTextFileMenu()
+
+							how = raw_input('Enter a number between 0 - 2 to select a menu \n')
+
+							try:
+
+								how = int(how)
+						
+								if ( (how < 0) or (how > 2)):
+
+									utilities.clearScreen()
+
+									print rangeError, ' 0 - 2 *** \n'
+
+									continue
+
+							except ValueError:
+
+								utilities.clearScreen()
+
+								print valueError
+
+							else:
+
+								if (how == 0):
+
+									# Quit this menu
+									break
+
+								elif (how == 1):
+									# Allocate via app
+
+									utilities.clearScreen()
+
+									# select between office and living space
+									utilities.chooseOfficeOrLivingMenu()
+
+									space = raw_input('Enter a number between 0 - 2 to select a menu \n')
+
+									try:
+
+										space = int(space)
+						
+										if ( (space < 0) or (space > 2)):
+
+											utilities.clearScreen()
+
+											print rangeError, ' 0 - 2 *** \n'
+
+											continue
+
+									except ValueError:
+
 										utilities.clearScreen()
-										print 'Exiting *** ', header, ' MENU *** \n'
-										break;
-									elif (choice == 1):
-										# allocate via app
-										utilities.clearScreen()
 
-										while (True):
+										print valueError
 
-											name = raw_input('Enter the name of the fellow: \n')
+									else:
 
-											if name:
-												fellow = Fellow(name)
+										if (space == 0):
+											break
 
-												campus.allocate(fellow, 'Living')
-												break
+										elif (space == 1):
+											# Office space selected
 
-										
-										
-									elif (choice == 2):
-										# allocate via text file
-										pass
-							
-						elif (alloc == 2):
-							# allocate staff
-							pass
+											while (True):
+
+												fellowName = raw_input('Enter the name of the fellow. \n')
+
+												if fellowName:
+
+													fellow = Fellow(fellowName)
+
+													campus.allocate(fellow, 'Office')
+
+													break
+
+										elif (space == 2):
+											# Living space selected
+
+											while (True):
+
+												fellowName = raw_input('Enter the name of the fellow. \n')
+
+												if fellowName:
+
+													fellow = Staff(fellowName)
+
+													campus.allocate(fellow, 'Living')
+
+													break
+									
+
+								elif (how == 2):
+
+									#figure out how to read from text file
+									pass
+
 			
 			elif ( answer == 2):
 				# get list of allocations
