@@ -14,83 +14,36 @@ Living
 Office
 *****
 -Office 1
-
-	>Godson Ukpere
-
-	#Stanley Ndagi
-
-	#Mahad Walusimbi
-
-	>Nyambura Kihoro
 -Office 2
-
-	>Anthony Nandaa
-
-	>Michael Rosenberg
 -Office 3
-
-	#Chris Vundi
-
-	#Chris Ganga
-
-	>Evan Green-Lowe
-
-	>Robert Opiyo
-
-	#Brian Mosigisi
-
-	#Teddy A.
 -Office 4
-
-	#Benjamin Kagia
-
-	>Jackson Saya
 -Office 5
-
-	#Brian Koech
-
-	#Stacey A.
 -Office 6
-
-	#Jee Githinji
-
-	#Gertrude Nyenyeshi
 -Office 7
-
-	#Collin Mutembei
-
-	#Alex Mwaleh
-
-	#Nate Martin
-
-	>Meshack Nyabiba
-
-	#Thomas Nyambati
-
-	#Kevin Gathuku
 -Office 8
-
-	#Joan
-
-	#Alex Kangethe
-
-	#Jeremy Kithome
-
-	#Lewis Kabui
-
-	#Eugene Mutai
 -Office 9
-
-	>Oscar
-
-	>Hellen Maina
-
-	#Hannah Koske
 -Office 10
 
-	#Eric Gichuri
+Unallocated
+*****
+>Jackson Saya
+#Alex Mwaleh
+#Mahad Walusimbi
+>Michael Rosenberg
+#Collin Mutembei
+>Joshua Mwaniki
+#Lewis Maina
+>Godson Ukpere
+#Eric Gichuri
+>Anthony Nandaa
+#Jeremy Kithome
+#Brian Koech
+>Nyambura Kihoro
+#Gertrude Nyenyeshi
+>Hellen Maina
+#Kevin Gathuku
+>Robert Opiyo
 
-	>Joshua Mwaniki
 
 
 
