@@ -295,22 +295,28 @@ while (True):
 
 			elif ( answer == 4):
 				# list unallocated people
-				pass
+
+				utilities.clearScreen()
+
+				fellowList = campus.getUnallocatedFellows()
+				staffList = campus.getUnallocatedStaff()
+
+				# print the unallocated staff
+
+				print '\n\n\n', '-' * 40, ' Staff List ', '-' * 40
+
+				for staff in staffList:
+
+					print staff
+
+				# print the unallocated fellows
+
+				print '-' * 40, ' Fellow List ', '-' * 40
+
+				for fellow in fellowList:
+
+					print fellow
+
 			elif ( answer == 5):
 				# sub menu
 				pass
-
-
-
-
-tandao = Office()
-tandao.setName('Tandao')
-print 'The first name is ', tandao.getName(), ' and I am an office.'
-print 'My max overcapacity is ', tandao.getMax(), ' people.'
-
-
-malindi = Living()
-malindi.setName('Malindi')
-print 'The second name is ', malindi.getName(), ' and I am a living space.'
-print 'My max overcapacity is ', malindi.getMax(), ' people.'
-
