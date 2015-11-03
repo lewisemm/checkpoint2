@@ -442,25 +442,200 @@ while (True):
 
 				utilities.clearScreen()
 
-				fellowList = campus.getUnallocatedFellows()
-				staffList = campus.getUnallocatedStaff()
+				unallocated = open('data/input.txt')
+
+				fellowOfficeList = []
+				fellowLivingList = []
+				staffList = []
+
+				while True:
+
+					line = unallocated.readline()
+
+					if line:
+
+						if (line[0] == '>'):
+
+							staffList.append(lines[0])
+
+						elif (line[0] == '#' and line[0] == '#'):
+
+							fellowOfficeList.append(line[2::])
+
+						elif (line[0] == '#' and line[1] != '#'):
+
+							fellowLivingList.append(lines[1::])
+
+					else:
+
+						break
 
 				# print the unallocated staff
 
-				print '\n\n\n', '-' * 40, ' Staff List ', '-' * 40
+				print '\n\n\n', '-' * 40, ' Unallocated Staff List ', '-' * 40
 
 				for staff in staffList:
 
 					print staff
 
-				# print the unallocated fellows
+				# print the unallocated fellows (Offices)
 
-				print '-' * 40, ' Fellow List ', '-' * 40
+				print '-' * 40, ' Unallocated Fellow List (Offices)', '-' * 40
 
-				for fellow in fellowList:
+				for fellow in fellowOfficeList:
+
+					print fellow
+
+				# print the unallocated fellows (Living)
+
+				print '-' * 40, ' Unallocated Fellow List (Living)', '-' * 40
+
+				for fellow in fellowLivingList:
 
 					print fellow
 
 			elif ( answer == 5):
-				# sub menu
-				pass
+				
+				while True:
+					
+					utilities.listRooms()
+
+					room = raw_input('Enter a number between 0 - 2 to select a menu.\n')
+
+					try:
+
+						room = int(room)
+
+						if ( (room < 0) or (room > 2)):
+
+							utilities.clearScreen()
+
+							print rangeError, ' 0 - 2 *** \n'
+
+							continue
+
+					except ValueError:
+
+						utilities.clearScreen()
+
+						print valueError
+
+					else:
+
+						if room == 0:
+
+							break
+
+						elif room == 1:
+
+							# List the offices
+							offices = campus.getOfficeRooms()
+
+							print '-' * 40, ' Office List ', '-' * 40
+
+							counter = 1
+
+							for office in offices:
+
+								print counter, '. ', office.getName()
+								counter += 1
+
+							print '0. Exit sub-menu \n'
+
+							selected = raw_input('Enter a number between 0 - ' + str(counter-1) + ' to select a menu.\n')
+
+							try:
+
+								selected = int(selected)
+
+								if ( (selected < 0) or (selected > counter)):
+
+									utilities.clearScreen()
+
+									print rangeError, ' 0 - ', counter, ' *** \n'
+
+									continue
+
+							except ValueError:
+
+								utilities.clearScreen()
+
+								print valueError
+
+							else:
+
+								if (selected == 0):
+
+									break
+
+								else:
+
+									occupants = offices[selected - 1].getOccupants()
+
+									print '\n\n', 'List of Occupants in ', offices[selected - 1].getName(), '\n'
+									print '-' * 40, '\n'
+
+									counter = 1
+
+									for person in occupants:
+
+										print counter, '. ', person.getName()
+
+
+						elif room == 2:
+
+							# List the living spaces
+							lSpaces = campus.getLivingRooms()
+
+							print '-' * 40, ' Living Spaces List ', '-' * 40
+
+							counter = 1
+
+							for space in lSpaces:
+
+								print counter, '. ', space.getName()
+								counter += 1
+
+							print '0. Exit sub-menu \n'
+
+							selected = raw_input('Enter a number between 0 - ' + str(counter-1) + ' to select a menu.\n')
+
+							try:
+
+								selected = int(selected)
+
+								if ( (selected < 0) or (selected > counter)):
+
+									utilities.clearScreen()
+
+									print rangeError, ' 0 - ', counter, ' *** \n'
+
+									continue
+
+							except ValueError:
+
+								utilities.clearScreen()
+
+								print valueError
+
+							else:
+
+								if (selected == 0):
+
+									break
+
+								else:
+
+									occupants = lSpaces[selected - 1].getOccupants()
+
+									print '\n\n', 'List of Occupants in ', lSpaces[selected - 1].getName(), '\n'
+									print '-' * 40, '\n'
+
+									counter = 1
+
+									for person in occupants:
+
+										print counter, '. ', person.getName()
+
+
+
