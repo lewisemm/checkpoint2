@@ -4,6 +4,7 @@ import utilities
 from amity import Amity
 from fellow import Fellow
 from staff import Staff
+from random import random
 
 campus = Amity()
 
@@ -134,8 +135,41 @@ while (True):
 
 								elif (how == 2):
 
-									#figure out how to read from file
-									pass
+									# read from unallocated list file
+									uStaff = open('data/input.txt')
+									uStaffList = []
+									edits = ''
+
+									for line in uStaff.readlines():
+
+										if line[0] == '>':
+											
+											staff = Staff(line[1::])
+											uStaffList.append(staff)
+
+										elif line[0] != '>':
+											
+											edits += line
+
+									# re-write file and exclude unallocated staff (retrieved above)
+									uStaff = open('data/input.txt', 'w')
+									uStaff.write(edits)
+									uStaff.close()
+
+									# Allocate as long as there are office spaces and unallocated staff
+									while ( len(uStaffList) > 0 ):
+
+											randStaff = int(random() * len(uStaffList))
+											campus.allocate(uStaffList[randStaff], 'Office')
+											uStaffList.pop(randStaff)
+											
+									# Save unallocated people back to file
+									if (len(uStaffList) > 0):
+
+										uStaff = open('data/input.txt', 'a+')
+
+										for staff in uStaffList:
+											uStaff.write('>' + staff.getName())
 
 						elif (chosen == 2):
 
