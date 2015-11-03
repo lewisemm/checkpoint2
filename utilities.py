@@ -8,6 +8,12 @@ def clearScreen():
 	if (ans != 0):
 		os.system('clear')
 
+def currentPath():
+	path = os.path.dirname(os.path.dirname(__file__))
+
+	return path
+
+
 
 def mainMenu():
 	print '-' * 80
