@@ -1,9 +1,9 @@
-from living import Living
-from office import Office
-from staff import Staff
-from fellow import Fellow
+from spaces.living import Living
+from spaces.office import Office
+from people.staff import Staff
+from people.fellow import Fellow
 from random import random
-from overflow import OverflowException
+from custom.overflow import OverflowException
 import os
 
 class Amity:

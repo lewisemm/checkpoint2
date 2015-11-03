@@ -1,9 +1,9 @@
-from living import Living
-from office import Office
+from spaces.living import Living
+from spaces.office import Office
 import utilities
 from amity import Amity
-from fellow import Fellow
-from staff import Staff
+from people import fellow
+from people import staff
 from random import random
 
 campus = Amity()
