@@ -271,10 +271,84 @@ while (True):
 									
 
 								elif (how == 2):
+									# Allocate via text file
 
-									#figure out how to read from text file
-									pass
+									utilities.clearScreen()
 
+									# select between office and living space
+									utilities.chooseOfficeOrLivingMenu()
+
+									space = raw_input('Enter a number between 0 - 2 to select a menu \n')
+
+									try:
+
+										space = int(space)
+						
+										if ( (space < 0) or (space > 2)):
+
+											utilities.clearScreen()
+
+											print rangeError, ' 0 - 2 *** \n'
+
+											continue
+
+									except ValueError:
+
+										utilities.clearScreen()
+
+										print valueError
+
+									else:
+
+										if (space == 0):
+											break
+
+										elif (space == 1):
+											# Office space selected
+
+#########################
+											# read from unallocated list file
+											uFellowFile = open('data/input.txt')
+											uFellowList = []
+											edits = ''
+
+											for line in uFellowFile.readlines():
+
+												if line[0] == '#' and line[1] == '#':
+											
+													fellow = Fellow(line[2::])
+													uFellowList.append(fellow)
+
+												elif line[1] != '#':
+											
+													edits += line
+
+											# re-write file and exclude unallocated staff (retrieved above)
+											uFellowFile = open('data/input.txt', 'w')
+											uFellowFile.write(edits)
+											uFellowFile.close()
+
+											# Allocate as long as there are office spaces and unallocated staff
+											while ( len(uFellowList) > 0 ):
+
+												randFellow = int(random() * len(uFellowList))
+												campus.allocate(uFellowList[randFellow], 'Office')
+												uFellowList.pop(randFellow)
+											
+											# Save unallocated people back to file
+											if (len(uFellowList) > 0):
+
+												uFellowFile = open('data/input.txt', 'a+')
+
+												for fellw in uFellowFile:
+													uFellowFile.write('#' + fellw.getName())
+#########################											
+											
+
+										elif (space == 2):
+											# Living space selected
+											pass
+											
 			
 			elif ( answer == 2):
 				# get list of allocations
