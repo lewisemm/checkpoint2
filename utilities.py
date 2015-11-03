@@ -63,3 +63,14 @@ def chooseOfficeOrLivingMenu():
 	print '0. Exit sub-menu'
 	print ' ' * 80
 	print '-' * 80
+
+def listRooms():
+	print '-' * 80
+	print '-' * 80
+	print ' ' * 80
+	print '1. Choose an Office.'
+	print '2. Choose a Living space.'
+	print ' ' * 80
+	print '0. Exit sub-menu'
+	print ' ' * 80
+	print '-' * 80
