@@ -12,9 +12,7 @@ class Amity:
 	def __init__(self):
 		self.livingRooms = []
 		self.officeRooms = []
-		self.unallocatedFellows = []
-		self.unallocatedStaff = []
-
+		
 	def prePopulate(self):
 		
 		# retrieve existing room names at data/allocation.txt
@@ -67,15 +65,6 @@ class Amity:
 				# Create a staff object from the name on the file
 				staff = Staff(line[2::])
 				self.officeRooms[lastIndex].addPeople(staff)
-
-			elif line[0] == '>':
-
-				self.unallocatedStaff.append(line[1::])
-
-			elif line[0] == '#':
-
-				self.unallocatedFellows.append(line[1::])
-
 
 		allocation.close()
 
@@ -252,8 +241,8 @@ class Amity:
 			elif (spaceType == 'Living'):
 				livingSpaceAllocation(person)
 
-	def getUnallocatedStaff(self):
-		return self.unallocatedStaff
+	def getLivingRooms(self):
+		return self.livingRooms
 
-	def getUnallocatedFellows(self):
-		return self.unallocatedFellows
+	def getOfficeRooms(self):
+		return self.officeRooms
