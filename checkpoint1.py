@@ -6,32 +6,6 @@ from people.fellow import Fellow
 from people.staff import Staff
 from random import random
 
-def printUnallocated(staffList, fellowOfficeList, fellowLivingList):
-
-    while True:
-
-        line = unallocated.readline()
-
-        if line:
-
-            if (line[0] == '>'):
-
-                staffList.append(line[1::])
-
-            elif (line[0] == '#' and line[1] == '#'):
-
-                fellowOfficeList.append(line[2::])
-
-            elif (line[0] == '#' and line[1] != '#'):
-
-                fellowLivingList.append(line[1::])
-
-        else:
-
-            break  
-
-    return [staffList, fellowOfficeList, fellowLivingList]
-
 
 campus = Amity()
 
@@ -503,13 +477,30 @@ while (True):
                 fellowLivingList = []
                 staffList = []
 
-                lists = printUnallocated(staffList, fellowOfficeList, fellowLivingList)
+                
+                while True:
 
-                staffList = lists[0]
-                fellowOfficeList = lists[1]
-                fellowLivingList = lists[2]
+                    line = unallocated.readline()
 
+                    if line:
 
+                        if (line[0] == '>'):
+
+                           staffList.append(line[1::])
+
+                        elif (line[0] == '#' and line[1] == '#'):
+
+                            fellowOfficeList.append(line[2::])
+
+                        elif (line[0] == '#' and line[1] != '#'):
+
+                            fellowLivingList.append(line[1::])
+
+                    else:
+
+                        break  
+
+    
                 # print the unallocated staff
 
                 print '\n\n\n', '-' * 40, ' Unallocated Staff List ', '-' * 40
