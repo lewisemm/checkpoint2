@@ -4,14 +4,15 @@ from amity import Amity
 from people.staff import Staff
 from people.fellow import Fellow
 from custom.overflow import OverflowException
+import checkpoint1
 
 
 class TestAllocationFromFile(unittest.TestCase):
 
     def setUp(self):
-
+        
         # Create users for the test and write them to file
-        users = ">Anthony Nandaa\n#Eric Gichuri\n#Mahad Walusimbi\n>Godson Ukpere\n##Kevin Ndungu\n##Joshua Mwaniki\n"
+        users = ">Anthony Nandaa\n#Eric Gichuri\n#Mahad Walusimbi\n>Godson Ukpere\n##Kevin Ndungu\n>Joshua Mwaniki\n"
 
         alloFile = open('data/input.txt', 'w+')
         alloFile.write(users)
@@ -36,6 +37,8 @@ class TestAllocationFromFile(unittest.TestCase):
 
         self.assertEqual(len(self.campus.getLivingRooms()), 4)
         self.assertEqual(len(self.campus.getOfficeRooms()), 6)
+
+    
 
     def test_allocate_through_app(self):
 
