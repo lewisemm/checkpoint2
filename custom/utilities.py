@@ -40,7 +40,7 @@ def choosePersonMenu():
     print '1. Allocate Staff.'
     print '2. Allocate Fellow.'
     print ' ' * 80
-    print '0. Quit application.'
+    print '0. Exit sub-menu'
     print ' ' * 80
     print '-' * 80
 
