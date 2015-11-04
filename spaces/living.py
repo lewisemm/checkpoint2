@@ -1,10 +1,10 @@
-import room
+from room import Room
 from overflow import OverflowException
 from people.fellow import Fellow
 
 # Living spaces have a default maximum of 4 people
 # Only fellows can occupy living spaces
-class Living(room.Room):
+class Living(Room):
 
 	# constructor
 	def __init__(self):
