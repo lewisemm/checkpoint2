@@ -4,10 +4,10 @@ from amity import Amity
 from people.staff import Staff
 from people.fellow import Fellow
 from custom.overflow import OverflowException
-import checkpoint1
 
 
 class TestAllocationFromFile(unittest.TestCase):
+
 
     def setUp(self):
         
@@ -38,9 +38,35 @@ class TestAllocationFromFile(unittest.TestCase):
         self.assertEqual(len(self.campus.getLivingRooms()), 4)
         self.assertEqual(len(self.campus.getOfficeRooms()), 6)
 
+    def test_unallocated_people(self):
+        """ Expect unallocateed people to be 6. """
+
+        uFile = open('data/input.txt')
+
+        unallocated = []
+
+        for line in uFile.readlines():
+            unallocated.append(line)
+
+        self.assertEqual(len(unallocated), 6)
+
+    def test_fellows_allocated_living(self):
+        """ Expect fellows allocated living spaces to be 6. """
+
+        aFile = open('data/allocated.txt')
+
+        allocated = []
+
+        for line in aFile.readlines():
+
+            if (line[0] == '\t'):
+                allocated.append(line)
+
+        self.assertEqual(len(allocated), 6)
     
 
     def test_allocate_through_app(self):
+
 
         # Expect the first room (Heroku) to have 4 occupants
         heroku = self.campus.getLivingRooms()[0]
