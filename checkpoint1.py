@@ -6,6 +6,33 @@ from people.fellow import Fellow
 from people.staff import Staff
 from random import random
 
+def printUnallocated(staffList, fellowOfficeList, fellowLivingList):
+
+    while True:
+
+        line = unallocated.readline()
+
+        if line:
+
+            if (line[0] == '>'):
+
+                staffList.append(line[1::])
+
+            elif (line[0] == '#' and line[1] == '#'):
+
+                fellowOfficeList.append(line[2::])
+
+            elif (line[0] == '#' and line[1] != '#'):
+
+                fellowLivingList.append(line[1::])
+
+        else:
+
+            break  
+
+    return [staffList, fellowOfficeList, fellowLivingList]
+
+
 campus = Amity()
 
 # Populating from data/allocation.txt
@@ -319,7 +346,6 @@ while (True):
                                         elif (space == 1):
                                             # Office space selected
 
-#########################
                                             # read from unallocated list file
                                             uFellowFile = open(
                                                 'data/input.txt')
@@ -366,11 +392,10 @@ while (True):
                                                 for fellw in uFellowFile:
                                                     uFellowFile.write(
                                                         '##' + fellw.getName())
-#########################
 
                                         elif (space == 2):
                                             # Living space selected
-#########################
+
                                             # read from unallocated list file
                                             uFellowFile = open(
                                                 'data/input.txt')
@@ -417,7 +442,6 @@ while (True):
                                                 for fellw in uFellowFile:
                                                     uFellowFile.write(
                                                         '#' + fellw.getName())
-#########################
 
             elif (answer == 2):
                 # get list of allocations
@@ -479,27 +503,12 @@ while (True):
                 fellowLivingList = []
                 staffList = []
 
-                while True:
+                lists = printUnallocated(staffList, fellowOfficeList, fellowLivingList)
 
-                    line = unallocated.readline()
+                staffList = lists[0]
+                fellowOfficeList = lists[1]
+                fellowLivingList = lists[2]
 
-                    if line:
-
-                        if (line[0] == '>'):
-
-                            staffList.append(lines[0])
-
-                        elif (line[0] == '#' and line[0] == '#'):
-
-                            fellowOfficeList.append(line[2::])
-
-                        elif (line[0] == '#' and line[1] != '#'):
-
-                            fellowLivingList.append(lines[1::])
-
-                    else:
-
-                        break
 
                 # print the unallocated staff
 
@@ -671,3 +680,6 @@ while (True):
                                     for person in occupants:
 
                                         print counter, '. ', person.getName()
+                                        counter += 1
+
+
