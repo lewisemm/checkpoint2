@@ -47,6 +47,8 @@ Office
 
 -Office 3
 
+	#Elijohn Njema
+
 	#Lewis Maina
 
 
@@ -54,6 +56,8 @@ Office
 
 -Office 4
 -Office 5
+
+	>Moses Ndungu
 
 	>Joshua Mwaniki
 

@@ -5,12 +5,4 @@ import person
 
 
 class Staff(person.Person):
-
-    def isBoarding(self):
-        return False
-
-    def setOffice(self, office):
-        self.office = office
-
-    def getOffice(self):
-        return self.office
+	pass

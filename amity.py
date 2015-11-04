@@ -8,7 +8,7 @@ import os
 
 
 def officeAllocation(person, officeList):
-    """ Allocates Andelans to an office. """
+    """ Allocates Andelans to an office at random. """
 
     # first check if there's room in any office
     available = False
@@ -178,8 +178,9 @@ class Amity:
         self.officeRooms = []
 
     def prePopulate(self):
+    	""" Initializes state from text files in the data folder of the app. """
 
-    # retrieve existing room names at data/allocation.txt
+    	# retrieve existing room names at data/allocation.txt
         
         allocation = open('data/allocated.txt')
 
@@ -233,7 +234,7 @@ class Amity:
         allocation.close()
 
     def allocate(self, person, spaceType):
-        """ Allocates Andelans to an office space at random. """
+        """ Allocates Andelans to an office or a living space space at random. """
 
         if isinstance(person, Staff):
             officeAllocation(person, self.getOfficeRooms())
@@ -247,7 +248,11 @@ class Amity:
                 livingSpaceAllocation(person, self.getLivingRooms())
 
     def getLivingRooms(self):
+    	""" Returns a list of living spaces. """
+
         return self.livingRooms
 
     def getOfficeRooms(self):
+    	""" Returns a list of offices. """
+    	
         return self.officeRooms

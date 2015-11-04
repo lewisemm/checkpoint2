@@ -9,16 +9,17 @@ from people.fellow import Fellow
 class Living(Room):
 
     # constructor
-
     def __init__(self):
         self.occupants = []
         self.max = 4
 
     def getMax(self):
+    	""" Returns the maximum number of people allowed for instances of Living."""
 
         return self.max
 
     def addFellow(self, fellow):
+    	""" Adds a Fellow to a living space. Rejects Staff members."""
 
         if isinstance(fellow, Fellow):
 
@@ -35,4 +36,6 @@ class Living(Room):
             raise TypeError('Living spaces are meant for Fellows only!')
 
     def getOccupants(self):
+    	""" Returns a list of current occupants for an instance of Living. """
+
         return self.occupants

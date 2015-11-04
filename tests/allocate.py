@@ -10,6 +10,7 @@ class TestAllocationFromFile(unittest.TestCase):
 
 
     def setUp(self):
+        """ Creates the context on which tests will be run. """
         
         # Create users for the test and write them to file
         users = ">Anthony Nandaa\n#Eric Gichuri\n#Mahad Walusimbi\n>Godson Ukpere\n##Kevin Ndungu\n>Joshua Mwaniki\n"
@@ -30,10 +31,13 @@ class TestAllocationFromFile(unittest.TestCase):
         self.campus.prePopulate()
 
     def tearDown(self):
+        """ Performs housekeeping to clean up test files after tests have been executed. """
+
         os.remove('data/input.txt')
         os.remove('data/allocated.txt')
 
     def test_prepopulate(self):
+        """ Expects 4 living spaces and 6 office rooms. """
 
         self.assertEqual(len(self.campus.getLivingRooms()), 4)
         self.assertEqual(len(self.campus.getOfficeRooms()), 6)
@@ -66,7 +70,7 @@ class TestAllocationFromFile(unittest.TestCase):
     
 
     def test_allocate_through_app(self):
-
+        """ Expects exception when allocation is performed on a full room. """
 
         # Expect the first room (Heroku) to have 4 occupants
         heroku = self.campus.getLivingRooms()[0]

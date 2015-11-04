@@ -8,16 +8,17 @@ from people.person import Person
 class Office(room.Room):
 
     # constructor
-
-    def __init__(self):
+	def __init__(self):
         self.occupants = []
         self.max = 6
 
     def getMax(self):
+    	""" Returns the maximum number of occupants allowed for instances of Office. """
 
         return self.max
 
     def addPeople(self, person):
+    	""" Adds people (either Staff or Fellow) to an office. Rejects all other instance types. """
 
         if isinstance(person, Person):
 
@@ -35,4 +36,6 @@ class Office(room.Room):
                 'Office spaces are meant to be allocated to people (Staff & Fellows)')
 
     def getOccupants(self):
+    	""" Returns a list of all current occupants of an instance of Office. """
+    	
         return self.occupants

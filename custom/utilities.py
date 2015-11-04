@@ -1,23 +1,28 @@
 import os
+import sys
 from people import fellow
 
 # definitions for functionalities across the app
 
 
 def clearScreen():
-    ans = os.system('cls')
-
-    if (ans != 0):
+    """ Clears the screen. """
+    
+    if sys.platform == 'linux2':
         os.system('clear')
 
 
 def currentPath():
+    """ Returns the current path to this file. """
+
     path = os.path.dirname(os.path.dirname(__file__))
 
     return path
 
 
 def mainMenu():
+    """ Displays the main menu to the user. """
+
     print '-' * 80
     print '-' * 40, ' MAIN MENU ', '-' * 28
     print '-' * 80
@@ -34,6 +39,8 @@ def mainMenu():
 
 
 def choosePersonMenu():
+    """ Displays menu for user to choose between Fellow and Staff. """
+
     print '-' * 80
     print '-' * 80
     print ' ' * 80
@@ -46,6 +53,8 @@ def choosePersonMenu():
 
 
 def appOrTextFileMenu():
+    """ Displays menu for user to select input preference. """
+
     print '-' * 80
     print '-' * 80
     print ' ' * 80
@@ -58,6 +67,8 @@ def appOrTextFileMenu():
 
 
 def chooseOfficeOrLivingMenu():
+    """ Displays menu to user to choose between an Office and a Living Space. """
+
     print '-' * 80
     print '-' * 80
     print ' ' * 80
@@ -70,6 +81,8 @@ def chooseOfficeOrLivingMenu():
 
 
 def listRooms():
+    """ Displays menu to user to choose between listing Offices and Living Rooms. """
+    
     print '-' * 80
     print '-' * 80
     print ' ' * 80
