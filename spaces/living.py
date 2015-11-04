@@ -1,5 +1,5 @@
 from room import Room
-from overflow import OverflowException
+from custom.overflow import OverflowException
 from people.fellow import Fellow
 
 # Living spaces have a default maximum of 4 people

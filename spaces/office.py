@@ -1,5 +1,5 @@
 import room
-from overflow import OverflowException
+from custom.overflow import OverflowException
 from people.person import Person
 
 # Office spaces have a default maximum of 6 people
