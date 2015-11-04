@@ -3,34 +3,36 @@ from overflow import OverflowException
 from people.person import Person
 
 # Office spaces have a default maximum of 6 people
+
+
 class Office(room.Room):
 
-	# constructor
-	def __init__(self):
-		self.occupants = []
-		self.max = 6
+    # constructor
 
-	def getMax(self):
+    def __init__(self):
+        self.occupants = []
+        self.max = 6
 
-		return self.max
+    def getMax(self):
 
+        return self.max
 
-	def addPeople(self, person):
+    def addPeople(self, person):
 
-		if isinstance(person, Person):
+        if isinstance(person, Person):
 
-			if ( len(self.occupants) < self.max):
+            if (len(self.occupants) < self.max):
 
-				self.occupants.append(person)
+                self.occupants.append(person)
 
-			else:
+            else:
 
-				raise OverflowException('This office space is full!')
+                raise OverflowException('This office space is full!')
 
-		else:
+        else:
 
-			raise TypeError('Office spaces are meant to be allocated to people (Staff & Fellows)')
+            raise TypeError(
+                'Office spaces are meant to be allocated to people (Staff & Fellows)')
 
-	def getOccupants(self):
-		return self.occupants
-				
+    def getOccupants(self):
+        return self.occupants

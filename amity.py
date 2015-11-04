@@ -6,243 +6,247 @@ from random import random
 from custom.overflow import OverflowException
 import os
 
+
 class Amity:
 
-	# constructor
-	def __init__(self):
-		self.livingRooms = []
-		self.officeRooms = []
-		
-	def prePopulate(self):
-		
-		# retrieve existing room names at data/allocation.txt
+    # constructor
 
-		allocation = open('data/allocated.txt')
+    def __init__(self):
+        self.livingRooms = []
+        self.officeRooms = []
 
-		while (True):
-			line = allocation.readline()
-			if not line:
-				break
+    def prePopulate(self):
 
-			if (line[0] == '+'):
-				# living spaces start with '+' in the file
-				aLivingRoom = Living()
-				aLivingRoom.setName(line[1::])
-				self.livingRooms.append(aLivingRoom)
+        # retrieve existing room names at data/allocation.txt
 
-			elif (line[0] == '-'):
-				# office spaces start with '-' in the file
-				anOfficeRoom = Office()
-				anOfficeRoom.setName(line[1::])
-				self.officeRooms.append(anOfficeRoom)
+        allocation = open('data/allocated.txt')
 
-			elif (line[0] == '\t' and line[1] != '>' and line[1] != '#'):
-				# This is a fellow in a living space
+        while (True):
+            line = allocation.readline()
+            if not line:
+                break
 
-				# insert the current fellow at the lastIndex
-				lastIndex = len(self.livingRooms) - 1
+            if (line[0] == '+'):
+                # living spaces start with '+' in the file
+                aLivingRoom = Living()
+                aLivingRoom.setName(line[1::])
+                self.livingRooms.append(aLivingRoom)
 
-				# Create a fellow object from the name on the file
-				fellow = Fellow(line[1::])
-				self.livingRooms[lastIndex].addFellow(fellow)
+            elif (line[0] == '-'):
+                # office spaces start with '-' in the file
+                anOfficeRoom = Office()
+                anOfficeRoom.setName(line[1::])
+                self.officeRooms.append(anOfficeRoom)
 
-			elif (line[0] == '\t' and line[1] == '#'):
-				# This is a fellow in an office space
+            elif (line[0] == '\t' and line[1] != '>' and line[1] != '#'):
+                # This is a fellow in a living space
 
-				# insert these people at the lastIndex
-				lastIndex = len(self.officeRooms) - 1
+                # insert the current fellow at the lastIndex
+                lastIndex = len(self.livingRooms) - 1
 
-				# Create a fellow object from the name on the file
-				fellow = Fellow(line[2::])
-				self.officeRooms[lastIndex].addPeople(fellow)
+                # Create a fellow object from the name on the file
+                fellow = Fellow(line[1::])
+                self.livingRooms[lastIndex].addFellow(fellow)
 
-			elif (line[0] == '\t' and line[1] == '>'):
-				# This is a staff member in an office space
+            elif (line[0] == '\t' and line[1] == '#'):
+                # This is a fellow in an office space
 
-				# insert these people at the lastIndex
-				lastIndex = len(self.officeRooms) - 1
+                # insert these people at the lastIndex
+                lastIndex = len(self.officeRooms) - 1
 
-				# Create a staff object from the name on the file
-				staff = Staff(line[2::])
-				self.officeRooms[lastIndex].addPeople(staff)
+                # Create a fellow object from the name on the file
+                fellow = Fellow(line[2::])
+                self.officeRooms[lastIndex].addPeople(fellow)
 
-		allocation.close()
+            elif (line[0] == '\t' and line[1] == '>'):
+                # This is a staff member in an office space
 
+                # insert these people at the lastIndex
+                lastIndex = len(self.officeRooms) - 1
 
-	def allocate(self, person, spaceType):
-		""" Allocates Andelans to an office space at random. """
+                # Create a staff object from the name on the file
+                staff = Staff(line[2::])
+                self.officeRooms[lastIndex].addPeople(staff)
 
-		def officeAllocation(person):
-			""" Allocates Andelans to an office. """
+        allocation.close()
 
-			# first check if there's room in any office
-			available = False
+    def allocate(self, person, spaceType):
+        """ Allocates Andelans to an office space at random. """
 
-			# find at least one available space to enable allocation
-			for ofisi in self.officeRooms:
+        def officeAllocation(person):
+            """ Allocates Andelans to an office. """
 
-				if len(ofisi.getOccupants()) < ofisi.max:
+            # first check if there's room in any office
+            available = False
 
-					available = True
+            # find at least one available space to enable allocation
+            for ofisi in self.officeRooms:
 
-					break;
+                if len(ofisi.getOccupants()) < ofisi.max:
 
-			if available:
-				# Try allocating this person an office as long as he encounters OverflowException
-				# because we know from variable 'available' that there's a space somewhere
+                    available = True
 
-				officeCount = len(self.officeRooms)
+                    break
 
-				while (True):
+            if available:
+                # Try allocating this person an office as long as he encounters OverflowException
+                # because we know from variable 'available' that there's a
+                # space somewhere
 
-					rand = int(random() * officeCount)
+                officeCount = len(self.officeRooms)
 
-					currentOffice = self.officeRooms[rand]
-				
-					try:
+                while (True):
 
-						currentOffice.addPeople(person)
+                    rand = int(random() * officeCount)
 
-					except OverflowException:
+                    currentOffice = self.officeRooms[rand]
 
-						print 'Cannot allocate to ', currentOffice.getName(), ' ... moving on.'
-						# loop afresh and search for another room
-						continue
+                    try:
 
-					else:
+                        currentOffice.addPeople(person)
 
-						edits = ''
+                    except OverflowException:
 
-						try:
+                        print 'Cannot allocate to ', currentOffice.getName(), ' ... moving on.'
+                        # loop afresh and search for another room
+                        continue
 
-							allocated = open('data/allocated.txt', 'r+')
+                    else:
 
-							for line in allocated.readlines():
+                        edits = ''
 
-								edits += line
+                        try:
 
-								if (line[1::] == currentOffice.getName()):
+                            allocated = open('data/allocated.txt', 'r+')
 
-									if isinstance(person, Fellow):
+                            for line in allocated.readlines():
 
-										edits += '\n\t#' + person.getName() + '\n'
+                                edits += line
 
-									elif isinstance(person, Staff):
+                                if (line[1::] == currentOffice.getName()):
 
-										edits += '\n\t>' + person.getName() + '\n'	
-									
-							# reposition pointer back to beginning to 
-							# overwrite old data with this modified version
-							allocated.seek(0)
+                                    if isinstance(person, Fellow):
 
-							# write the modified version
-							allocated.write(edits)
+                                        edits += '\n\t#' + \
+                                            person.getName() + '\n'
 
-						except Exception as e:
-							print '*** An Exception occured! *** \n', e, '\n'
+                                    elif isinstance(person, Staff):
 
-						finally:
-							allocated.close()
-						
-						print 'Insert Successful! Allocated to office space ', currentOffice.getName()
+                                        edits += '\n\t>' + \
+                                            person.getName() + '\n'
 
-						break
+                            # reposition pointer back to beginning to
+                            # overwrite old data with this modified version
+                            allocated.seek(0)
 
-			else:
-				print 'There are no more office spaces available.'
+                            # write the modified version
+                            allocated.write(edits)
 
+                        except Exception as e:
+                            print '*** An Exception occured! *** \n', e, '\n'
 
-		def livingSpaceAllocation(person):
-			""" Allocates fellows to a living space at random. """
+                        finally:
+                            allocated.close()
 
-			# Assume there's no space available until proven otherwise
-			available = False
+                        print 'Insert Successful! Allocated to office space ', currentOffice.getName()
 
-			for eachRoom in self.livingRooms:
+                        break
 
-				if len(eachRoom.getOccupants()) < eachRoom.max:
+            else:
+                print 'There are no more office spaces available.'
 
-					# This means there's a space available in one of the rooms
-					available = True
+        def livingSpaceAllocation(person):
+            """ Allocates fellows to a living space at random. """
 
-					break
+            # Assume there's no space available until proven otherwise
+            available = False
 
-			if available:
+            for eachRoom in self.livingRooms:
 
-				# Try allocating this person a living space as long as he encounters OverflowException
-				# because there's a space (guaranteed) somewhere
+                if len(eachRoom.getOccupants()) < eachRoom.max:
 
-				roomCount = len(self.livingRooms)
+                    # This means there's a space available in one of the rooms
+                    available = True
 
-				while (True):
+                    break
 
-					rand = int(random() * roomCount)
+            if available:
 
-					# random room selection
-					currentRoom = self.livingRooms[rand]
-					
-					try:
-						
-						currentRoom.addFellow(person)
+                # Try allocating this person a living space as long as he encounters OverflowException
+                # because there's a space (guaranteed) somewhere
 
-					except OverflowException:
-						print 'Cannot allocate to ', currentRoom.getName(), ' ... moving on.'
-						# loop afresh to find another random room
-						continue
+                roomCount = len(self.livingRooms)
 
-					# when attempting to allocate staff a living space
-					except TypeError:
+                while (True):
 
-						# loop afresh to find another random room
-						continue
+                    rand = int(random() * roomCount)
 
-					else:
+                    # random room selection
+                    currentRoom = self.livingRooms[rand]
 
-						# if person has found a room, persist this info.
-						try:
+                    try:
 
-							allocated = open('data/allocated.txt', 'r+')
-							temp = open('data/temp.txt', 'w')
+                        currentRoom.addFellow(person)
 
-							# get the starting index where the room's name first appears
-							for lines in allocated.readlines():
+                    except OverflowException:
+                        print 'Cannot allocate to ', currentRoom.getName(), ' ... moving on.'
+                        # loop afresh to find another random room
+                        continue
 
-								temp.write(lines)
+                    # when attempting to allocate staff a living space
+                    except TypeError:
 
-								if lines[1::] == currentRoom.getName():
-									temp.write('\n\t' + person.getName() + '\n')
+                        # loop afresh to find another random room
+                        continue
 
-							os.remove('data/allocated.txt')
-							os.rename('data/temp.txt', 'data/allocated.txt')
-									
-						except Exception as e:
-							print '*** An Exception occured! *** \n', e
+                    else:
 
-						finally:
-							allocated.close()
-							temp.close()
+                        # if person has found a room, persist this info.
+                        try:
 
-						print 'Insert Successful! Allocated to living space ', currentRoom.getName()
+                            allocated = open('data/allocated.txt', 'r+')
+                            temp = open('data/temp.txt', 'w')
 
-						break
+                            # get the starting index where the room's name
+                            # first appears
+                            for lines in allocated.readlines():
 
-			else:
-				print 'There are no more living spaces available.'
+                                temp.write(lines)
 
+                                if lines[1::] == currentRoom.getName():
+                                    temp.write(
+                                        '\n\t' + person.getName() + '\n')
 
-		if isinstance(person, Staff):
-			officeAllocation(person)
+                            os.remove('data/allocated.txt')
+                            os.rename('data/temp.txt', 'data/allocated.txt')
 
-		elif isinstance(person, Fellow):
+                        except Exception as e:
+                            print '*** An Exception occured! *** \n', e
 
-			if (spaceType == 'Office'):
-				officeAllocation(person)
+                        finally:
+                            allocated.close()
+                            temp.close()
 
-			elif (spaceType == 'Living'):
-				livingSpaceAllocation(person)
+                        print 'Insert Successful! Allocated to living space ', currentRoom.getName()
 
-	def getLivingRooms(self):
-		return self.livingRooms
+                        break
 
-	def getOfficeRooms(self):
-		return self.officeRooms
+            else:
+                print 'There are no more living spaces available.'
+
+        if isinstance(person, Staff):
+            officeAllocation(person)
+
+        elif isinstance(person, Fellow):
+
+            if (spaceType == 'Office'):
+                officeAllocation(person)
+
+            elif (spaceType == 'Living'):
+                livingSpaceAllocation(person)
+
+    def getLivingRooms(self):
+        return self.livingRooms
+
+    def getOfficeRooms(self):
+        return self.officeRooms

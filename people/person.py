@@ -1,21 +1,20 @@
 # Person is the superclass to Staff and Fellow
 # Every person has a name and gender
+
+
 class Person:
 
-	def __init__(self, name):
-		self.name = name
+    def __init__(self, name):
+        self.name = name
 
+    def getName(self):
 
-	def getName(self):
+        return self.name
 
-		return self.name
+    def setGender(self, gender):
 
+        self.gender = gender
 
-	def setGender(self, gender):
+    def getGender(self):
 
-		self.gender = gender
-
-
-	def getGender(self):
-		
-		return self.gender
+        return self.gender
