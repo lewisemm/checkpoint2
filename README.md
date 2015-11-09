@@ -15,7 +15,8 @@ The office space allocation apps models a room allocation system. Allocations ar
 ### How to use
 
 1. Open Terminal on your computer.
-2. Run ```python checkpoint1.py```. The app produces a menu similar to the one below. To select an item, input the number corresponding to the menu you want and press the enter key.
+2. Navigate to the project’s root directory (the checkpoint’s folder.)
+3. Run ```python checkpoint1.py```. The app produces a menu similar to the one below. To select an item, input the number corresponding to the menu you want and press the enter key.
 
 	```
 		1. Allocate people to rooms
@@ -73,7 +74,7 @@ The office space allocation apps models a room allocation system. Allocations ar
    ##### 3.4 allocate(person, spaceType)
       * Receives two arguments. The first is an object of class Person while the second is a string indicating the type of space to allocate (i.e. can either be 'Office' or 'Living')
       * If the first argument object is of instance Staff, the officeAllocation method is called.
-      * If the first argument object is of instance Fellow, the spaceType argument determines which method (between livingSpaceAllocation and officeAllocation) whill be called.
+      * If the first argument object is of instance Fellow, the spaceType argument determines which method (between livingSpaceAllocation and officeAllocation) will be called.
 
    ##### 3.5 officeAllocation(person, officeList)
       * Allocates a person at a time to an office space.
@@ -86,3 +87,40 @@ The office space allocation apps models a room allocation system. Allocations ar
       * First iterates through the livingList and stops if a space is found.
       * If a space is found, a loop will attempt to allocate the person to a random living space. Chances are that an attempt will be made to allocate the person to living space that's already full. When this happens, an OverflowException will be thrown and the loop will continue running. Otherwise if a successful allocation is made, this information will be persisted to the allocated.txt file and the program breaks out of the loop.
       * If a space is not found, the program will show a message to the user informing him/her of this
+
+#### 4. Tests
+   * Tests done using the unittest module.
+
+   ##### 4.1 setUp()
+      * Creates context for running tests.
+      * Creates the ```input.txt``` file and initializes it with six people (three staff members, two fellows [to be allocated living spaces], and one fellow [to be allocated an office])
+      * Creates the ```allocated.txt``` file and initializes it with four living spaces (Heroku, Sound Cloud, Node, Digital Ocean) and five office spaces (Staff Room, Office 1, Office 2, Office 3, Office 4 and Office 5)
+      * Heroku already has maximum occupants.
+      * Creates the Amity campus and initializes offices and living spaces with occupants data from the ```allocated.txt``` file.
+
+   ##### 4.2 tearDown()
+      * Deletes the ```input.txt``` and ```allocated.txt``` files once tests are run. (Housekeeping)
+
+   ##### 4.3 test_prepopulate()
+      * Tests for four living rooms as read from the file that was created during setUp()
+      * Tests for six office spaces as read from the file that was created during setUp()
+
+   ##### 4.4 test_unallocated_people()
+      * Retrieve data from ```input.txt``` (created during setUp()) and expect six unallocated people.
+
+   ##### 4.5 test_fellows_allocated_living()
+      * Read from the ```allocated.txt``` file created during setUp() and expect six fellows.
+
+   ##### 4.6 test_allocate_through_app()
+      * Expects room Heroku to have four occupants.
+      * Expects Digital Ocean to have two occupants. 
+      * Tests for exception. Attempt is made to add a fellow to room Heroku (which is already full) and the test expects an OverflowException to be raised.
+      * Tests for exception. Attempt is made to add a staff member to a living space and a TypeError is raised.
+
+#### 5. Running the tests
+   Ideally run through unittest with test discovery.
+
+   * Navigate to the project’s root directory i.e. the checkpoints folder
+   * Run the following command
+      *  ```python -m unittest discover -s tests -p “*_test.py” ```
+   * The tests are considered successful if there are no failures.
