@@ -75,5 +75,5 @@ class TestAllocationFromFile(unittest.TestCase):
         with self.assertRaises(TypeError):
             heroku.addFellow(staffer)
 
-    if __name__ == '__main__':
-        unittest.main()
+suite = unittest.TestLoader().loadTestsFromTestCase(TestAllocationFromFile)
+unittest.TextTestRunner(verbosity=2).run(suite)
