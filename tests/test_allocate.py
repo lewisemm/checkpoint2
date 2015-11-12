@@ -1,5 +1,6 @@
 import unittest
 import os
+
 from amity import Amity
 from people.staff import Staff
 from people.fellow import Fellow
@@ -7,7 +8,6 @@ from custom.overflow import OverflowException
 
 
 class TestAllocationFromFile(unittest.TestCase):
-
 
     def setUp(self):
         """ Creates the context on which tests will be run. """
@@ -34,8 +34,8 @@ class TestAllocationFromFile(unittest.TestCase):
 
     def test_prepopulate(self):
         """ Expects 4 living spaces and 6 office rooms. """
-        self.assertEqual(len(self.campus.getLivingRooms()), 4)
-        self.assertEqual(len(self.campus.getOfficeRooms()), 6)
+        self.assertEqual(len(self.campus.livingRooms), 4)
+        self.assertEqual(len(self.campus.officeRooms), 6)
 
     def test_unallocated_people(self):
         """ Expect unallocateed people to be 6. """
@@ -58,12 +58,12 @@ class TestAllocationFromFile(unittest.TestCase):
     def test_allocate_through_app(self):
         """ Expects exception when allocation is performed on a full room. """
         # Expect the first room (Heroku) to have 4 occupants
-        heroku = self.campus.getLivingRooms()[0]
-        self.assertEqual(len(heroku.getOccupants()), 4)
+        heroku = self.campus.livingRooms[0]
+        self.assertEqual(len(heroku.occupants), 4)
 
         # Expect the fourth room (Digital Ocean) to have 2 occupants
-        docean = self.campus.getLivingRooms()[3]
-        self.assertEqual(len(docean.getOccupants()), 2)
+        docean = self.campus.livingRooms[3]
+        self.assertEqual(len(docean.occupants), 2)
 
         # Expect OverflowException because heroku is full
         aFellow = Fellow("Martin Nate")

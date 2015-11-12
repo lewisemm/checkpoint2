@@ -1,21 +1,19 @@
+from random import random
+
 from spaces.living import Living
 from spaces.office import Office
 from custom import utilities
 from amity import Amity
 from people.fellow import Fellow
 from people.staff import Staff
-from random import random
 
 campus = Amity()
-
-# Populating from data/allocation.txt
 campus.prePopulate()
 
-# useeful vars
+# useful vars
 rangeError = 'Range error: *** Please select a number that is within the range'
 valueError = 'Value error: *** Please enter a number in digit form ***\n'
 
-# User Menu
 while (True):
     utilities.mainMenu()
     answer = raw_input('Enter a number between 0 - 5 to select a menu.\n')
@@ -32,6 +30,7 @@ while (True):
         print valueError
     else:
         if (answer == 0):
+            utilities.clearScreen()
             print 'Thank you for using this product. Goodbye. \n\n'
             break
         else:
@@ -55,6 +54,7 @@ while (True):
                         print valueError
                     else:
                         if (chosen == 0):
+                            utilities.clearScreen()
                             # quit this menu
                             break
                         elif (chosen == 1):
@@ -74,9 +74,11 @@ while (True):
                                 print valueError
                             else:
                                 if (how == 0):
+                                    utilities.clearScreen()
                                     # Quit this menu
                                     break
                                 elif (how == 1):
+                                    utilities.clearScreen()
                                     while (True):
                                         staffName = raw_input('Enter the name of the staff member. \n')
                                         if staffName:
@@ -84,6 +86,8 @@ while (True):
                                             campus.allocate(worker, 'Office')
                                             break
                                 elif (how == 2):
+                                    utilities.clearScreen()
+
                                     # read from unallocated list file
                                     uStaff = open('data/input.txt')
                                     uStaffList = []
@@ -94,22 +98,25 @@ while (True):
                                             uStaffList.append(staff)
                                         elif line[0] != '>':
                                             edits += line
+
                                     # re-write file and exclude unallocated
                                     # staff (retrieved above)
                                     uStaff = open('data/input.txt', 'w')
                                     uStaff.write(edits)
                                     uStaff.close()
+
                                     # Allocate as long as there are office
                                     # spaces and unallocated staff
                                     while (len(uStaffList) > 0):
                                         randStaff = int(random() * len(uStaffList))
                                         campus.allocate(uStaffList[randStaff], 'Office')
                                         uStaffList.pop(randStaff)
+
                                     # Save unallocated people back to file
                                     if (len(uStaffList) > 0):
                                         uStaff = open('data/input.txt', 'a+')
                                         for staff in uStaffList:
-                                            uStaff.write('>' + staff.getName())
+                                            uStaff.write('>' + staff.name)
                         elif (chosen == 2):
                             # Allocating fellows
                             utilities.clearScreen()
@@ -127,6 +134,7 @@ while (True):
                                 print valueError
                             else:
                                 if (how == 0):
+                                    utilities.clearScreen()
                                     # Quit this menu
                                     break
                                 elif (how == 1):
@@ -146,8 +154,10 @@ while (True):
                                         print valueError
                                     else:
                                         if (space == 0):
+                                            utilities.clearScreen()
                                             break
                                         elif (space == 1):
+                                            utilities.clearScreen()
                                             # Office space selected
                                             while (True):
                                                 fellowName = raw_input('Enter the name of the fellow. \n')
@@ -156,6 +166,7 @@ while (True):
                                                     campus.allocate(fellow, 'Office')
                                                     break
                                         elif (space == 2):
+                                            utilities.clearScreen()
                                             # Living space selected
                                             while (True):
                                                 fellowName = raw_input('Enter the name of the fellow. \n')
@@ -180,8 +191,11 @@ while (True):
                                         print valueError
                                     else:
                                         if (space == 0):
+                                            utilities.clearScreen()
                                             break
                                         elif (space == 1):
+                                            utilities.clearScreen()
+
                                             # Office space selected
                                             # read from unallocated list file
                                             uFellowFile = open('data/input.txt')
@@ -193,12 +207,14 @@ while (True):
                                                     uFellowList.append(fellow)
                                                 elif line[1] != '#':
                                                     edits += line
+
                                             # re-write file and exclude
                                             # unallocated staff (retrieved
                                             # above)
                                             uFellowFile = open('data/input.txt', 'w')
                                             uFellowFile.write(edits)
                                             uFellowFile.close()
+
                                             # Allocate as long as there are
                                             # office spaces and unallocated
                                             # staff
@@ -206,13 +222,15 @@ while (True):
                                                 randFellow = int(random() * len(uFellowList))
                                                 campus.allocate(uFellowList[randFellow], 'Office')
                                                 uFellowList.pop(randFellow)
-                                            # Save unallocated people back to
-                                            # file
+
+                                            # Save unallocated people back to file
                                             if (len(uFellowList) > 0):
                                                 uFellowFile = open('data/input.txt', 'a+')
                                                 for fellw in uFellowFile:
-                                                    uFellowFile.write('##' + fellw.getName())
+                                                    uFellowFile.write('##' + fellw.name)
                                         elif (space == 2):
+                                            utilities.clearScreen()
+
                                             # Living space selected
                                             # read from unallocated list file
                                             uFellowFile = open('data/input.txt')
@@ -224,12 +242,14 @@ while (True):
                                                     uFellowList.append(fellow)
                                                 else:
                                                     edits += line
+
                                             # re-write file and exclude
                                             # unallocated staff (retrieved
                                             # above)
                                             uFellowFile = open('data/input.txt', 'w')
                                             uFellowFile.write(edits)
                                             uFellowFile.close()
+
                                             # Allocate as long as there are
                                             # office spaces and unallocated
                                             # staff
@@ -237,12 +257,13 @@ while (True):
                                                 randFellow = int(random() * len(uFellowList))
                                                 campus.allocate(uFellowList[randFellow], 'Living')
                                                 uFellowList.pop(randFellow)
+
                                             # Save unallocated people back to
                                             # file
                                             if (len(uFellowList) > 0):
                                                 uFellowFile = open('data/input.txt', 'a+')
                                                 for fellw in uFellowFile:
-                                                    uFellowFile.write('#' + fellw.getName())
+                                                    uFellowFile.write('#' + fellw.name)
             elif (answer == 2):
                 # get list of allocations
                 pass
@@ -259,8 +280,7 @@ while (True):
                         print lines[1::]
                         print '-' * 40
                     elif lines[0] == '\t' and lines[1] != '>' and lines[1] != '#':
-                        # if it starts with a tab and it's not an office
-                        # allocation
+                        # if it starts with a tab and it's not an office allocation
                         print '\t', lines[1::]
                     elif lines[0:-1] == 'Office':
                         print '\n\n', 'Office Spaces \n', '-' * 80, '\n'
@@ -297,15 +317,20 @@ while (True):
                 print '\n\n\n', '-' * 40, ' Unallocated Staff List ', '-' * 40
                 for staff in staffList:
                     print staff
+
                 # print the unallocated fellows (Offices)
                 print '-' * 40, ' Unallocated Fellow List (Offices)', '-' * 40
                 for fellow in fellowOfficeList:
                     print fellow
+
                 # print the unallocated fellows (Living)
                 print '-' * 40, ' Unallocated Fellow List (Living)', '-' * 40
                 for fellow in fellowLivingList:
                     print fellow
+
             elif (answer == 5):
+                utilities.clearScreen()
+
                 while True:
                     utilities.listRooms()
                     room = raw_input('Enter a number between 0 - 2 to select a menu.\n')
@@ -320,16 +345,19 @@ while (True):
                         print valueError
                     else:
                         if room == 0:
+                            utilities.clearScreen()
                             break
                         elif room == 1:
+                            utilities.clearScreen()
+
                             # List the offices
-                            offices = campus.getOfficeRooms()
+                            offices = campus.officeRooms
                             print '-' * 40, ' Office List ', '-' * 40
                             counter = 1
                             for office in offices:
-                                print counter, '. ', office.getName()
+                                print('{0}. {1}'.format(counter, office.name[:-1]))
                                 counter += 1
-                            print '0. Exit sub-menu \n'
+                            print '\n0. Exit sub-menu \n'
                             selected = raw_input('Enter a number between 0 - ' + str(counter - 1) + ' to select a menu.\n')
                             try:
                                 selected = int(selected)
@@ -342,23 +370,28 @@ while (True):
                                 print valueError
                             else:
                                 if (selected == 0):
+                                    utilities.clearScreen()
                                     break
                                 else:
-                                    occupants = offices[selected - 1].getOccupants()
-                                    print '\n\n', 'List of Occupants in ', offices[selected - 1].getName(), '\n'
+                                    utilities.clearScreen()
+                                    occupants = offices[selected - 1].occupants
+                                    print '\n\n', 'List of Occupants in ', offices[selected - 1].name, '\n'
                                     print '-' * 40, '\n'
                                     counter = 1
                                     for person in occupants:
-                                        print counter, '. ', person.getName()
+                                        print counter, '.', person.name
+                                        counter += 1
                         elif room == 2:
+                            utilities.clearScreen()
+
                             # List the living spaces
-                            lSpaces = campus.getLivingRooms()
+                            lSpaces = campus.livingRooms
                             print '-' * 40, ' Living Spaces List ', '-' * 40
                             counter = 1
                             for space in lSpaces:
-                                print counter, '. ', space.getName()
+                                print('{0}. {1}'.format(counter, space.name[:-1]))
                                 counter += 1
-                            print '0. Exit sub-menu \n'
+                            print '\n0. Exit sub-menu \n'
                             selected = raw_input('Enter a number between 0 - ' + str(counter - 1) + ' to select a menu.\n')
                             try:
                                 selected = int(selected)
@@ -371,14 +404,14 @@ while (True):
                                 print valueError
                             else:
                                 if (selected == 0):
+                                    utilities.clearScreen()
                                     break
                                 else:
-                                    occupants = lSpaces[selected - 1].getOccupants()
-                                    print '\n\n', 'List of Occupants in ', lSpaces[selected - 1].getName(), '\n'
+                                    utilities.clearScreen()
+                                    occupants = lSpaces[selected - 1].occupants
+                                    print 'List of Occupants in ', lSpaces[selected - 1].name, '\n'
                                     print '-' * 40, '\n'
                                     counter = 1
                                     for person in occupants:
-                                        print counter, '. ', person.getName()
+                                        print counter, '. ', person.name
                                         counter += 1
-
-

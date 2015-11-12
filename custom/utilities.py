@@ -1,9 +1,9 @@
+""" Definitions for functionalities across the app. """
+
 import os
 import sys
+
 from people import fellow
-
-# definitions for functionalities across the app
-
 
 def clearScreen():
     """ Clears the screen. """

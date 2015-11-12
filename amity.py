@@ -1,26 +1,26 @@
+import os
+from random import random
+
 from spaces.living import Living
 from spaces.office import Office
 from people.staff import Staff
 from people.fellow import Fellow
-from random import random
 from custom.overflow import OverflowException
-import os
 
 
-def officeAllocation(person, officeList):
+def office_allocation(person, officeList):
     """ Allocates Andelans to an office at random. """
     # first check if there's room in any office
     available = False
     # find at least one available space to enable allocation
     for ofisi in officeList:
-        if len(ofisi.getOccupants()) < ofisi.max:
+        if len(ofisi.occupants) < ofisi.max:
             available = True
             break
 
     if available:
         # Try allocating this person an office as long as he encounters OverflowException
-        # because we know from variable 'available' that there's a
-        # space somewhere
+        # because we know from variable 'available' that there's a space somewhere
 
         officeCount = len(officeList)
         while (True):
@@ -29,8 +29,7 @@ def officeAllocation(person, officeList):
             try:
                 currentOffice.addPeople(person)
             except OverflowException:
-                print 'Cannot allocate to ', currentOffice.getName(), ' ... moving on.'
-                # loop afresh and search for another room
+                print 'Cannot allocate ', person.name, ' to ', currentOffice.name, ' ... moving on.'
                 continue
             else:
                 edits = ''
@@ -38,35 +37,33 @@ def officeAllocation(person, officeList):
                     allocated = open('data/allocated.txt', 'r+')
                     for line in allocated.readlines():
                         edits += line
-                        if (line[1::] == currentOffice.getName()):
+                        if (line[1::] == currentOffice.name):
                             if isinstance(person, Fellow):
                                 edits += '\n\t#' + \
-                                    person.getName() + '\n'
+                                    person.name + '\n'
                             elif isinstance(person, Staff):
                                 edits += '\n\t>' + \
-                                    person.getName() + '\n'
+                                    person.name + '\n'
 
                     # reposition pointer back to beginning to
                     # overwrite old data with this modified version
                     allocated.seek(0)
-                    # write the modified version
                     allocated.write(edits)
                 except Exception as e:
                     print '*** An Exception occured! *** \n', e, '\n'
                 finally:
                     allocated.close()
-                print 'Insert Successful! Allocated to office space ', currentOffice.getName()
+                print 'Insert Successful! Allocated ', person.name, ' to  ', currentOffice.name 
                 break
     else:
         print 'There are no more office spaces available.'
 
-
-def livingSpaceAllocation(person, livingList):
+def living_space_allocation(person, livingList):
     """ Allocates fellows to a living space at random. """
     # Assume there's no space available until proven otherwise
     available = False
     for eachRoom in livingList:
-        if len(eachRoom.getOccupants()) < eachRoom.max:
+        if len(eachRoom.occupants) < eachRoom.max:
         # This means there's a space available in one of the rooms
             available = True
             break
@@ -81,7 +78,7 @@ def livingSpaceAllocation(person, livingList):
             try:
                 currentRoom.addFellow(person)
             except OverflowException:
-                print 'Cannot allocate to ', currentRoom.getName(), ' ... moving on.'
+                print 'Cannot allocate ', person.name, ' to ', currentRoom.name, ' ... moving on.'
                 # loop afresh to find another random room
                 continue
             # when attempting to allocate staff a living space
@@ -90,27 +87,29 @@ def livingSpaceAllocation(person, livingList):
                 continue
             else:
                 # if person has found a room, persist this info.
+                edits = ''
                 try:
                     allocated = open('data/allocated.txt', 'r+')
-                    temp = open('data/temp.txt', 'w')
                     # get the starting index where the room's name
                     # first appears
                     for lines in allocated.readlines():
-                        temp.write(lines)
-                        if lines[1::] == currentRoom.getName():
-                            temp.write(
-                                '\n\t' + person.getName() + '\n')
-                    os.remove('data/allocated.txt')
-                    os.rename('data/temp.txt', 'data/allocated.txt')
+                        edits += lines
+                        if lines[1::] == currentRoom.name:
+                            edits += '\n\t' + person.name + '\n'
+
+                    # reposition pointer back to beginning to
+                    # overwrite old data with this modified version
+                    allocated.seek(0)
+                    allocated.write(edits)
                 except Exception as e:
                     print '*** An Exception occured! *** \n', e
                 finally:
                     allocated.close()
-                    temp.close()
-                print 'Insert Successful! Allocated to living space ', currentRoom.getName()
+                print 'Insert Successful! Allocated to living space ', currentRoom.name, ' to ', person.name
                 break
     else:
         print 'There are no more living spaces available.'
+
 
 class Amity:
 
@@ -163,17 +162,10 @@ class Amity:
     def allocate(self, person, spaceType):
         """ Allocates Andelans to an office or a living space space at random. """
         if isinstance(person, Staff):
-            officeAllocation(person, self.getOfficeRooms())
+            office_allocation(person, self.officeRooms)
         elif isinstance(person, Fellow):
             if (spaceType == 'Office'):
-                officeAllocation(person, self.getOfficeRooms())
+                office_allocation(person, self.officeRooms)
             elif (spaceType == 'Living'):
-                livingSpaceAllocation(person, self.getLivingRooms())
+                living_space_allocation(person, self.livingRooms)
 
-    def getLivingRooms(self):
-    	""" Returns a list of living spaces. """
-        return self.livingRooms
-
-    def getOfficeRooms(self):
-    	""" Returns a list of offices. """
-        return self.officeRooms
