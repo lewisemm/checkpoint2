@@ -3,7 +3,6 @@
 
 
 class Person:
-	# constructor accepting name argument
-    
+	
     def __init__(self, name):
         self.name = name

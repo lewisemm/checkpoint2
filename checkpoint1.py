@@ -14,6 +14,8 @@ campus.prePopulate()
 rangeError = 'Range error: *** Please select a number that is within the range'
 valueError = 'Value error: *** Please enter a number in digit form ***\n'
 
+file_path = utilities.getPath('data/')
+
 while (True):
     utilities.mainMenu()
     answer = raw_input('Enter a number between 0 - 5 to select a menu.\n')
@@ -89,7 +91,7 @@ while (True):
                                     utilities.clearScreen()
 
                                     # read from unallocated list file
-                                    uStaff = open('data/input.txt')
+                                    uStaff = open(file_path + 'input.txt')
                                     uStaffList = []
                                     edits = ''
                                     for line in uStaff.readlines():
@@ -101,7 +103,7 @@ while (True):
 
                                     # re-write file and exclude unallocated
                                     # staff (retrieved above)
-                                    uStaff = open('data/input.txt', 'w')
+                                    uStaff = open(file_path + 'input.txt', 'w')
                                     uStaff.write(edits)
                                     uStaff.close()
 
@@ -114,7 +116,7 @@ while (True):
 
                                     # Save unallocated people back to file
                                     if (len(uStaffList) > 0):
-                                        uStaff = open('data/input.txt', 'a+')
+                                        uStaff = open(file_path + 'input.txt', 'a+')
                                         for staff in uStaffList:
                                             uStaff.write('>' + staff.name)
                         elif (chosen == 2):
@@ -198,7 +200,7 @@ while (True):
 
                                             # Office space selected
                                             # read from unallocated list file
-                                            uFellowFile = open('data/input.txt')
+                                            uFellowFile = open(file_path + 'input.txt')
                                             uFellowList = []
                                             edits = ''
                                             for line in uFellowFile.readlines():
@@ -211,7 +213,7 @@ while (True):
                                             # re-write file and exclude
                                             # unallocated staff (retrieved
                                             # above)
-                                            uFellowFile = open('data/input.txt', 'w')
+                                            uFellowFile = open(file_path + 'input.txt', 'w')
                                             uFellowFile.write(edits)
                                             uFellowFile.close()
 
@@ -225,7 +227,7 @@ while (True):
 
                                             # Save unallocated people back to file
                                             if (len(uFellowList) > 0):
-                                                uFellowFile = open('data/input.txt', 'a+')
+                                                uFellowFile = open(file_path + 'input.txt', 'a+')
                                                 for fellw in uFellowFile:
                                                     uFellowFile.write('##' + fellw.name)
                                         elif (space == 2):
@@ -233,7 +235,7 @@ while (True):
 
                                             # Living space selected
                                             # read from unallocated list file
-                                            uFellowFile = open('data/input.txt')
+                                            uFellowFile = open(file_path + 'input.txt')
                                             uFellowList = []
                                             edits = ''
                                             for line in uFellowFile.readlines():
@@ -246,7 +248,7 @@ while (True):
                                             # re-write file and exclude
                                             # unallocated staff (retrieved
                                             # above)
-                                            uFellowFile = open('data/input.txt', 'w')
+                                            uFellowFile = open(file_path + 'input.txt', 'w')
                                             uFellowFile.write(edits)
                                             uFellowFile.close()
 
@@ -261,7 +263,7 @@ while (True):
                                             # Save unallocated people back to
                                             # file
                                             if (len(uFellowList) > 0):
-                                                uFellowFile = open('data/input.txt', 'a+')
+                                                uFellowFile = open(file + 'input.txt', 'a+')
                                                 for fellw in uFellowFile:
                                                     uFellowFile.write('#' + fellw.name)
             elif (answer == 2):
@@ -270,7 +272,7 @@ while (True):
             elif (answer == 3):
                 # print allocation list
                 utilities.clearScreen()
-                allocations = open('data/allocated.txt')
+                allocations = open(file_path + 'allocated.txt')
                 for lines in allocations.readlines():
                     if lines[0:-1] == 'Living':
                         # A header (visual separator)
@@ -296,7 +298,7 @@ while (True):
             elif (answer == 4):
                 # list unallocated people
                 utilities.clearScreen()
-                unallocated = open('data/input.txt')
+                unallocated = open(file_path + 'input.txt')
                 fellowOfficeList = []
                 fellowLivingList = []
                 staffList = []

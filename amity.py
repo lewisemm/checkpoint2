@@ -6,7 +6,10 @@ from spaces.office import Office
 from people.staff import Staff
 from people.fellow import Fellow
 from custom.overflow import OverflowException
+from custom import utilities
 
+file_path = utilities.getPath('data/')
+ 
 
 def office_allocation(person, officeList):
     """ Allocates Andelans to an office at random. """
@@ -34,7 +37,8 @@ def office_allocation(person, officeList):
             else:
                 edits = ''
                 try:
-                    allocated = open('data/allocated.txt', 'r+')
+
+                    allocated = open(file_path + 'allocated.txt', 'r+')
                     for line in allocated.readlines():
                         edits += line
                         if (line[1::] == currentOffice.name):
@@ -89,7 +93,7 @@ def living_space_allocation(person, livingList):
                 # if person has found a room, persist this info.
                 edits = ''
                 try:
-                    allocated = open('data/allocated.txt', 'r+')
+                    allocated = open(file_path + 'allocated.txt', 'r+')
                     # get the starting index where the room's name
                     # first appears
                     for lines in allocated.readlines():
@@ -117,11 +121,11 @@ class Amity:
     def __init__(self):
         self.livingRooms = []
         self.officeRooms = []
-
+        
     def prePopulate(self):
     	""" Initializes state from text files in the data folder of the app. """
     	# retrieve existing room names at data/allocation.txt
-        allocation = open('data/allocated.txt')
+        allocation = open(file_path + 'allocated.txt')
         while (True):
             line = allocation.readline()
             if not line:

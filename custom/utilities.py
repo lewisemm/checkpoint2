@@ -10,10 +10,13 @@ def clearScreen():
     if sys.platform == 'linux2':
         os.system('clear')
 
-def currentPath():
+def getPath(directory):
     """ Returns the current path to this file. """
-    path = os.path.dirname(os.path.dirname(__file__))
-    return path
+    dir_path = os.path.dirname(os.path.dirname(__file__))
+
+    file_path = os.path.join(dir_path, directory)
+    
+    return file_path
 
 def mainMenu():
     """ Displays the main menu to the user. """
