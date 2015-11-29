@@ -31,7 +31,6 @@ manager = session()
 def load_user(user_id):
 	return manager.query(models.User).filter_by(id=user_id).first()
 
-#@auth.verify_password
 def verify_password(username_or_token, password):
 
 	user = models.User.verify_auth_token(username_or_token)
@@ -77,7 +76,7 @@ class BucketList(Resource):
 
 			args = parser.parse_args()
 			name = args['name']
-			created_by = args['created_by']
+			created_by = current_user.username
 
 			bucket = models.BucketList(name=name, created_by=created_by)
 			# ipdb.set_trace()
@@ -106,7 +105,71 @@ class BucketList(Resource):
 
 		return ({'bucketlist': res_json})
 
-api.add_resource(BucketList, '/bucketlist')
+api.add_resource(BucketList, '/bucketlists/')
+
+class BucketListID(Resource):
+	@login_required
+	def put(self, id):
+		try:
+			parser = reqparse.RequestParser()
+			parser.add_argument('name', type=str, help='Name of the bucket list')
+			parser.add_argument('created_by', type=str, help='Name of the user who created bucket list')
+
+			args = parser.parse_args()
+			name = args['name']
+			created_by = args['created_by']
+
+			bucket = models.BucketList(name=name, created_by=created_by)
+			# ipdb.set_trace()
+			manager = session()
+			manager.add(bucket)
+			manager.commit()
+
+			return {'message': 'successful post'}
+		except Exception as e:
+			return {'error': str(e)}
+
+	@login_required
+	def get(self, id):
+		result = manager.query(models.BucketList).filter_by(buck_id=id).first()
+		
+		if result:
+			current_bucket = {}
+			current_bucket['id'] = result.buck_id
+			current_bucket['name'] = result.name
+			current_bucket['items'] = []
+			current_bucket['date_created'] = str(result.date_created)
+			current_bucket['date_modified'] = str(result.date_modified)
+			current_bucket['created_by'] = result.created_by
+	
+			return ({'bucketlist': current_bucket})
+		else:
+			return ({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
+	
+	@login_required
+	def delete(self, id):
+		pass
+
+api.add_resource(BucketListID, '/bucketlist/<int:id>')
+
+class BucketListItems(Resource):
+	@login_required
+	def post(self, id):
+		pass
+
+
+api.add_resource(BucketListItemsID, '/bucketlist/<int:id>/items/')
+
+class BucketListItemsID(Resource):
+	@login_required
+	def put(self, id):
+		pass
+
+	@login_required
+	def delete(self, id):
+		pass
+
+api.add_resource(BucketListItemsID, '/bucketlist/<int:id>/items/<int:items_id>')
 
 @app.route('/login/token', methods=['GET'])
 @login_required
@@ -119,7 +182,7 @@ def tokenize():
 def index():
 	return render_template('index.html', error=None)
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/auth/login', methods=['GET', 'POST'])
 def login():
 	if request.method == 'GET':
 		return render_template('login.html', error=None)
@@ -139,12 +202,13 @@ def login():
     	return render_template('login.html', error='Neither GET nor POST')
 		
 			
-@app.route("/logout")
+@app.route('/auth/logout', methods=['GET'])
 @login_required
 def logout():
-    logout_user()
-   	return render_template('logout.html', error='None')
 
+	if request.method == 'GET':
+	    logout_user()
+	return render_template('logout.html')
     
 if __name__ == '__main__':
 	app.run(debug=True)
