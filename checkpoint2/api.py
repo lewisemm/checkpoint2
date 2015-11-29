@@ -25,6 +25,32 @@ manager = session()
 # DBSession = sessionmaker(bind=engine)
 # session = DBSession()
 
+class NewUser(Resource):
+	def post(self):
+		try:
+			parser = reqparse.RequestParser()
+			parser.add_argument('username', type=str, help='Username')
+			parser.add_argument('password', type=str, help='Password')
+
+			args = parser.parse_args()
+			username = args['username']
+			password = args['password']
+
+			if username is None or password is None:
+							return {'message': 'Some arguments missing'}
+			if manager.query(models.User).filter_by(username = username).first() is not None:
+							return {'message': 'User already exists'}
+			user = models.User(username = username)
+			user.hash_password(password)
+			manager.add(user)
+			manager.commit()
+
+			return {'message': 'User created successfully'}
+		except Exception as e:
+			return {'error': str(e)}
+
+api.add_resource(NewUser, '/user/registration')
+
 class BucketList(Resource):
 	def post(self):
 		try:
