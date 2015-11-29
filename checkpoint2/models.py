@@ -6,9 +6,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+from flask.ext.login import UserMixin
+
 from passlib.apps import custom_app_context as pwd_context
 
-from itsdangerous import (TimedJSONWebSignatureSerialier as Serializer, BadSignature, SignatureExpired)
+from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 Base = declarative_base()
 
@@ -36,10 +38,10 @@ class Item(Base):
 	bucket_id = Column(Integer, ForeignKey('bucketlist.buck_id'))
 	bucketlist = relationship('BucketList')
 
-class User(Base):
+class User(Base, UserMixin):
 	__tablename__ = 'users'
 	id = Column(Integer, primary_key=True)
-	username = Column(String(30), index=True)
+	username = Column(String(30), index=True, unique=True)
 	password_hash = Column(String(128))
 
 	def hash_password(self, password):

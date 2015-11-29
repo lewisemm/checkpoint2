@@ -1,9 +1,9 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template, Markup, request, redirect, url_for, flash
 from flask_restful import Resource, Api, reqparse
 from flask.json import jsonify
-from flask.ext.httpauth import HTTPBasicAuth
+from flask.ext.login import LoginManager, login_required, login_user, logout_user
 
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
@@ -12,18 +12,26 @@ from sqlalchemy.ext.serializer import loads, dumps
 import ipdb
 
 import models
+from forms import LoginForm
 
 app = Flask(__name__)
 api = Api(app)
+app.config.update(SECRET_KEY=os.environ['SECRET_KEY'])
 
-auth = HTTPBasicAuth()
+login_manager = LoginManager()
+login_manager.init_app(app)
+
 
 engine = create_engine('sqlite:///api.db')
 session = sessionmaker()
 session.configure(bind=engine)
 manager = session()
 
-@auth.verify_password
+@login_manager.user_loader
+def load_user(user_id):
+	return manager.query(models.User).filter_by(id=user_id).first()
+
+#@auth.verify_password
 def verify_password(username_or_token, password):
 
 	user = models.User.verify_auth_token(username_or_token)
@@ -36,34 +44,31 @@ def verify_password(username_or_token, password):
 	g.user = user
 	return True
 
-class NewUser(Resource):
-	def post(self):
+@app.route('/user/registration', methods=['GET', 'POST'])
+def registration():
+	if request.method == 'GET':
+		return render_template('register.html', error=None)
+
+	elif request.method == 'POST':
 		try:
-			parser = reqparse.RequestParser()
-			parser.add_argument('username', type=str, help='Username')
-			parser.add_argument('password', type=str, help='Password')
-
-			args = parser.parse_args()
-			username = args['username']
-			password = args['password']
-
+			username = request.form['username']
+			password = request.form['password']
 			if username is None or password is None:
-							return {'message': 'Some arguments missing'}
+				return render_template('registration.html', error='Username and/or password missing!')
 			if manager.query(models.User).filter_by(username = username).first() is not None:
-							return {'message': 'User already exists'}
-			user = models.User(username = username)
+				return render_template('registration.html', error='User already exists!')
+
+			user = models.User(username=username)
 			user.hash_password(password)
 			manager.add(user)
 			manager.commit()
 
-			return {'message': 'User created successfully'}
+			return render_template('registration.html', error='User successfully registered!')
 		except Exception as e:
-			return {'error': str(e)}
-
-api.add_resource(NewUser, '/user/registration')
+			return render_template('registration.html', error=e)
 
 class BucketList(Resource):
-	@auth.login_required
+	@login_required
 	def post(self):
 		try:
 			parser = reqparse.RequestParser()
@@ -84,6 +89,7 @@ class BucketList(Resource):
 		except Exception as e:
 			return {'error': str(e)}
 
+	@login_required
 	def get(self):
 		result = manager.query(models.BucketList).all()
 		res_json = []
@@ -102,12 +108,43 @@ class BucketList(Resource):
 
 api.add_resource(BucketList, '/bucketlist')
 
-class Tokens(Resource):
-	@auth.login_required
-	def get(self):
-		token = g.user.generate_auth_token()
-		return jsonify({'token': token.decode('ascii')})
+@app.route('/login/token', methods=['GET'])
+@login_required
+def tokenize():
+	token = g.user.generate_auth_token()
+	return jsonify({'token': token.decode('ascii')})
 
-api.add_resource(Tokens, '/user/token')
+
+@app.route('/index', methods=['GET'])
+def index():
+	return render_template('index.html', error=None)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	if request.method == 'GET':
+		return render_template('login.html', error=None)
+	
+	elif request.method == 'POST':
+		username = request.form['username']
+		password = request.form['password']
+
+		user = manager.query(models.User).filter_by(username=username).first()
+		if not user:
+			return render_template('login.html', error='That username does not exist!')
+		elif user.verify_password(password):
+			login_user(user)
+			flash('Logged in successfully.')
+
+        	return redirect(url_for('index'))
+    	return render_template('login.html', error='Neither GET nor POST')
+		
+			
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+   	return render_template('logout.html', error='None')
+
+    
 if __name__ == '__main__':
 	app.run(debug=True)
