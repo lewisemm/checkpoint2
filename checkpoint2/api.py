@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from flask.json import jsonify
+from flask.ext.httpauth import HTTPBasicAuth
 
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
@@ -15,15 +16,25 @@ import models
 app = Flask(__name__)
 api = Api(app)
 
+auth = HTTPBasicAuth()
+
 engine = create_engine('sqlite:///api.db')
 session = sessionmaker()
 session.configure(bind=engine)
 manager = session()
 
-# 
-# Base.metadata.bind = engine
-# DBSession = sessionmaker(bind=engine)
-# session = DBSession()
+@auth.verify_password
+def verify_password(username_or_token, password):
+
+	user = models.User.verify_auth_token(username_or_token)
+
+	if not user:
+		user = manager.query(models.User).filter_by(username = username_or_token).first()
+
+		if not user or not user.verify_password(password):
+			return False
+	g.user = user
+	return True
 
 class NewUser(Resource):
 	def post(self):
@@ -52,6 +63,7 @@ class NewUser(Resource):
 api.add_resource(NewUser, '/user/registration')
 
 class BucketList(Resource):
+	@auth.login_required
 	def post(self):
 		try:
 			parser = reqparse.RequestParser()
@@ -88,8 +100,14 @@ class BucketList(Resource):
 
 		return ({'bucketlist': res_json})
 
+api.add_resource(BucketList, '/bucketlist')
 
-api.add_resource(BucketList, '/BucketList')
+class Tokens(Resource):
+	@auth.login_required
+	def get(self):
+		token = g.user.generate_auth_token()
+		return jsonify({'token': token.decode('ascii')})
 
+api.add_resource(Tokens, '/user/token')
 if __name__ == '__main__':
 	app.run(debug=True)

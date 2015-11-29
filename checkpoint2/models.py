@@ -8,6 +8,8 @@ from sqlalchemy.orm import relationship
 
 from passlib.apps import custom_app_context as pwd_context
 
+from itsdangerous import (TimedJSONWebSignatureSerialier as Serializer, BadSignature, SignatureExpired)
+
 Base = declarative_base()
 
 class BucketList(Base):
@@ -45,6 +47,23 @@ class User(Base):
 
 	def verify_password(self, password):
 		return pwd_context.verify(password, self.password_hash)
+
+	def generate_auth_token(self, expiration=600):
+		s = Serialization(app.config['SECRET_KEY'], expires_in = expiration)
+		return s.dumps({'id':self.id})
+
+	@staticmethod
+	def verify_auth_token(token):
+		s = Serializer(app.config['SECRET_KEY'])
+		try:
+			data = s.loads(token)
+		except SignatureExpired:
+			return None
+		except BadSignature:
+			return None
+
+		user = manager.query(models.User).get(data['id'])
+		return user
 
 if __name__ == '__main__':
 	engine = create_engine('sqlite:///api.db', echo=True)
