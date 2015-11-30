@@ -68,5 +68,5 @@ class User(Base, UserMixin):
 		return user
 
 if __name__ == '__main__':
-	engine = create_engine('sqlite:///api.db', echo=True)
+	engine = create_engine(os.environ['DATABASE_URL'], echo=True)
 	Base.metadata.create_all(engine)

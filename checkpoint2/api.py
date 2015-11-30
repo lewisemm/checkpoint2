@@ -12,7 +12,6 @@ from sqlalchemy.ext.serializer import loads, dumps
 import ipdb
 
 import models
-from forms import LoginForm
 
 app = Flask(__name__)
 api = Api(app)
@@ -22,7 +21,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-engine = create_engine('sqlite:///api.db')
+engine = create_engine(os.environ['DATABASE_URL'])
 session = sessionmaker()
 session.configure(bind=engine)
 manager = session()
@@ -50,39 +49,50 @@ def registration():
 
 	elif request.method == 'POST':
 		try:
-			username = request.form['username']
-			password = request.form['password']
+
+			json_data = request.get_json()
+			username = str(json_data['username'])
+			password = str(json_data['password'])
+
 			if username is None or password is None:
-				return render_template('registration.html', error='Username and/or password missing!')
-			if manager.query(models.User).filter_by(username = username).first() is not None:
-				return render_template('registration.html', error='User already exists!')
+				return render_template('register.html', error='Username and/or password missing!')
+
+			exists = manager.query(models.User).filter_by(username = username).first()
+			if exists:
+				return render_template('register.html', error='User already exists!')
 
 			user = models.User(username=username)
 			user.hash_password(password)
+			print 'B* please!!!'
 			manager.add(user)
 			manager.commit()
 
-			return render_template('registration.html', error='User successfully registered!')
+			return render_template('register.html', error='User successfully registered!')
 		except Exception as e:
-			return render_template('registration.html', error=e)
+			return render_template('register.html', error=e)
 
 class BucketList(Resource):
 	@login_required
 	def post(self):
 		try:
-			parser = reqparse.RequestParser()
-			parser.add_argument('name', type=str, help='Name of the bucket list')
-			parser.add_argument('created_by', type=str, help='Name of the user who created bucket list')
+			# parser = reqparse.RequestParser()
+			# parser.add_argument('name', type=str, help='Name of the bucket list')
+			# parser.add_argument('created_by', type=str, help='Name of the user who created bucket list')
 
-			args = parser.parse_args()
-			name = args['name']
-			created_by = current_user.username
+			# args = parser.parse_args()
+			# name = args['name']
+			# created_by = current_user.username
+			json_data = request.json
 
-			bucket = models.BucketList(name=name, created_by=created_by)
-			# ipdb.set_trace()
-			manager = session()
-			manager.add(bucket)
-			manager.commit()
+			for bucket in json_data:
+				name = bucket['name']
+				created_by = request.user
+				bucket = models.BucketList(name=name, created_by=created_by)
+				ipdb.set_trace()
+				manager = session()
+				manager.add(bucket)
+				manager.commit()
+			
 
 			return {'message': 'successful post'}
 		except Exception as e:
@@ -120,7 +130,6 @@ class BucketListID(Resource):
 			created_by = args['created_by']
 
 			bucket = models.BucketList(name=name, created_by=created_by)
-			# ipdb.set_trace()
 			manager = session()
 			manager.add(bucket)
 			manager.commit()
@@ -150,7 +159,7 @@ class BucketListID(Resource):
 	def delete(self, id):
 		pass
 
-api.add_resource(BucketListID, '/bucketlist/<int:id>')
+api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
 class BucketListItems(Resource):
 	@login_required
@@ -158,7 +167,7 @@ class BucketListItems(Resource):
 		pass
 
 
-api.add_resource(BucketListItemsID, '/bucketlist/<int:id>/items/')
+api.add_resource(BucketListItems, '/bucketlists/<int:id>/items/')
 
 class BucketListItemsID(Resource):
 	@login_required
@@ -169,7 +178,7 @@ class BucketListItemsID(Resource):
 	def delete(self, id):
 		pass
 
-api.add_resource(BucketListItemsID, '/bucketlist/<int:id>/items/<int:items_id>')
+api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:items_id>')
 
 @app.route('/login/token', methods=['GET'])
 @login_required
@@ -188,17 +197,18 @@ def login():
 		return render_template('login.html', error=None)
 	
 	elif request.method == 'POST':
-		username = request.form['username']
-		password = request.form['password']
+		json_data = request.get_json()
+		username = str(json_data['username'])
+		password = str(json_data['password'])
 
 		user = manager.query(models.User).filter_by(username=username).first()
 		if not user:
 			return render_template('login.html', error='That username does not exist!')
 		elif user.verify_password(password):
 			login_user(user)
-			flash('Logged in successfully.')
+			
 
-        	return redirect(url_for('index'))
+        	return jsonify({'message': 'Logged in successfully.'})
     	return render_template('login.html', error='Neither GET nor POST')
 		
 			
