@@ -56,7 +56,7 @@ class User(Base, UserMixin):
 		return s.dumps({'id':self.id})
 
 	@staticmethod
-	def verify_auth_token(token):
+	def verify_auth_token(token, manager):
 		s = Serializer(current_app.config['SECRET_KEY'])
 		try:
 			data = s.loads(token)
@@ -65,7 +65,7 @@ class User(Base, UserMixin):
 		except BadSignature:
 			return None
 
-		user = manager.query(models.User).get(data['id'])
+		user = manager.query(User).get(data['id'])
 		return user
 
 if __name__ == '__main__':

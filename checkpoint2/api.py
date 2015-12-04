@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, Markup, request, redirect, url_for, flash
+from flask import Flask, render_template, Markup, request, redirect, url_for, flash, g
 from flask_restful import Resource, Api, reqparse
 from flask.json import jsonify
 from flask.ext.login import LoginManager, login_required, login_user, logout_user, current_user
@@ -36,17 +36,16 @@ def load_user(user_id):
 
 @auth.verify_password
 def verify_password(username_or_token, password):
+	token = request.headers.get('c2_token')
+	if token:
+		user = models.User.verify_auth_token(token, manager)
 
-	user = models.User.verify_auth_token(username_or_token)
-	ipdb.set_trace()
-
-	if not user:
-		user = manager.query(models.User).filter_by(username = username_or_token).first()
-
-		if not user or not user.verify_password(password):
-			return False
-	g.user = user
-	return True
+		if user:
+			return user
+		else:
+			return False#jsonify({'message':'Invalid/Expired token!'})		
+	else:
+		return False#jsonify({'message':'You need to log in to access this route!'})	
 
 @app.route('/user/registration', methods=['GET', 'POST'])
 def registration():
@@ -78,7 +77,7 @@ def registration():
 
 
 class BucketList(Resource):
-	@login_required
+	@auth.login_required
 	def post(self):
 		try:
 			json_data = request.get_json()
@@ -96,7 +95,6 @@ class BucketList(Resource):
 
 	@auth.login_required
 	def get(self, limit=20):
-
 		result = manager.query(models.BucketList).order_by(desc(models.BucketList.date_created)).limit(limit)
 		
 		res_json = []
@@ -131,7 +129,7 @@ api.add_resource(BucketList, '/bucketlists/')
 
 
 class BucketListID(Resource):
-	@login_required
+	@auth.login_required
 	def put(self, id):
 		try:
 			json_data = request.get_json()
@@ -152,7 +150,7 @@ class BucketListID(Resource):
 		except Exception as e:
 			return {'error': str(e)}
 
-	@login_required
+	@auth.login_required
 	def get(self, id):
 		result = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		
@@ -169,7 +167,7 @@ class BucketListID(Resource):
 		else:
 			return ({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
 	
-	@login_required
+	@auth.login_required
 	def delete(self, id):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		manager.delete(bucketlist)
@@ -181,7 +179,7 @@ api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
 
 class BucketListItems(Resource):
-	@login_required
+	@auth.login_required
 	def post(self, id):
 
 		# check if bucketlist exists
@@ -202,7 +200,7 @@ api.add_resource(BucketListItems, '/bucketlists/<int:id>/items/')
 
 
 class BucketListItemsID(Resource):
-	@login_required
+	@auth.login_required
 	def put(self, id, item_id):
 
 		# check if bucketlist exists
@@ -225,7 +223,7 @@ class BucketListItemsID(Resource):
 			return ({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
 
 
-	@login_required
+	@auth.login_required
 	def delete(self, id, item_id):
 		pass
 
@@ -234,7 +232,9 @@ api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:item_id>')
 @app.route('/login/token', methods=['GET'])
 def tokenize():
 	token = current_user.generate_auth_token()
-	return jsonify({'token': token.decode('ascii')})
+	decoded = token.decode('ascii')
+	request.username = decoded
+	return jsonify({'token': decoded})
 
 
 @app.route('/index', methods=['GET'])
@@ -264,12 +264,12 @@ def login():
 				return render_template('login.html', error='Invalid password!')
 		
 @app.route('/auth/logout', methods=['GET'])
-@login_required
+@auth.login_required
 def logout():
 
 	if request.method == 'GET':
 	    logout_user()
-	return render_template('logout.html')
+	return render_template('logout.html', current_user)
     
 if __name__ == '__main__':
 	app.run(debug=True)
