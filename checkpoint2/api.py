@@ -27,12 +27,22 @@ session = sessionmaker()
 session.configure(bind=engine)
 manager = session()
 
+access_denied = {'message': 'Access denied!'}
+
 # @login_manager.user_loader
 # def load_user(user_id):
 # 	return manager.query(models.User).filter_by(id=user_id).first()
 
 def get_request_token():
 	return request.headers.get('username')
+
+def is_bucketlist_owner(bucketlist):
+	token = get_request_token()
+	# Ensure the owner od the bucketlist is the only one who can update it
+	if models.User.verify_auth_token(token, manager).username == bucketlist.created_by:
+		return True
+	else:
+		return False
 
 @auth.verify_password
 def verify_password(username_or_token, password):
@@ -126,17 +136,19 @@ class BucketListID(Resource):
 			json_data = request.get_json()
 
 			bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
-
+			
 			if bucketlist:
-				bucketlist.name = json_data['name']
-				bucketlist.date_modified = func.now()
-				manager.add(bucketlist)
-				manager.commit()
-
-				return {'message': 'Bucketlist updated successfully'}
+				if is_bucketlist_owner(bucketlist):
+					bucketlist.name = json_data['name']
+					bucketlist.date_modified = func.now()
+					manager.add(bucketlist)
+					manager.commit()
+					return jsonify({'message': 'Bucketlist updated successfully'})
+				else:
+					return jsonify(access_denied)
 			else:
-				return {'message': 'That bucket list id doesnt exist'}
-
+				return jsonify({'message': 'That bucket list id doesnt exist'})
+			
 		except Exception as e:
 			return {'error': str(e)}
 
@@ -164,23 +176,29 @@ class BucketListID(Resource):
 			current_bucket['date_modified'] = str(bucketlist.date_modified)
 			current_bucket['created_by'] = bucketlist.created_by
 	
-			return ({'bucketlist': current_bucket})
+			return jsonify({'bucketlist': current_bucket})
 		else:
-			return ({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
+			return jsonify({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
 	
 	@auth.login_required
 	def delete(self, id):
-		# delete all the items under this bucketlist first to prevent Integrity errors
-		del_items = manager.query(models.Item).filter_by(bucket_id=id).all()
-		if del_items:
-			manager.delete(del_items)
-			manager.commit()
-		# delete the bucketlist itself
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
-		manager.delete(bucketlist)
-		manager.commit()
 
-		return {'message': 'bucketlist of id ' + str(id) + ' has been deleted'}
+		if bucketlist:
+			if is_bucketlist_owner(bucketlist):
+				# delete all the items under this bucketlist first to prevent Integrity errors
+				del_items = manager.query(models.Item).filter_by(bucket_id=id).all()
+				if del_items:
+					manager.delete(del_items)
+					manager.commit()
+				# delete the bucketlist itself
+				manager.delete(bucketlist)
+				manager.commit()
+				return jsonify({'message': 'bucketlist of id ' + str(id) + ' has been deleted'})
+			else:
+				return jsonify(access_denied)
+		else:
+			return jsonify({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
 
 api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
@@ -209,31 +227,23 @@ api.add_resource(BucketListItems, '/bucketlists/<int:id>/items/')
 class BucketListItemsID(Resource):
 	@auth.login_required
 	def put(self, id, item_id):
-
 		# check if bucketlist exists
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
-
 		if bucketlist:
-
-			json_data = request.get_json()
-
-			item = manager.query(models.Item).filter_by(item_id=item_id).first()
-			item.name = json_data['name']
-			item.date_modified = func.now()
-
-			if json_data['done'] == 'True':
-				item.done = True
-			elif json_data['done'] == 'False':
-				item.done = False
+			if is_bucketlist_owner(bucketlist):
+				json_data = request.get_json()
+				item = manager.query(models.Item).filter_by(item_id=item_id).first()
+				item.name = json_data['name']
+				item.date_modified = func.now()
+				if json_data['done'] == 'True':
+					item.done = True
+				elif json_data['done'] == 'False':
+					item.done = False
+				manager.add(item)
+				manager.commit()
+				return jsonify({'message': 'Item of id ' + str(item_id) + ' from bucket of id ' + str(id) + ' has been updated'})
 			else:
-				jsonify({'message': 'Invalid entry for "done" field in item of id ' + str(item_id) + ' in bucketlist of id ' + str(id)})
-				
-			import ipdb; ipdb.set_trace()
-
-			manager.add(item)
-			manager.commit()
-
-			return jsonify({'message': 'Item of id ' + str(item_id) + ' from bucket of id ' + str(id) + ' has been updated'})
+				return jsonify(access_denied)
 		else:
 			return jsonify({'message': 'Bucket of id ' + str(id) + ' doesnt exist'})
 
@@ -242,14 +252,20 @@ class BucketListItemsID(Resource):
 	def delete(self, id, item_id):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
-			item = manager.query(models.Item).filter_by(item_id=item_id, bucket_id=bucketlist.buck_id).first()
-			if item:
-				manager.delete(item)
-				manager.commit()
+			if is_bucketlist_owner(bucketlist):
+				if is_bucketlist_owner(bucketlist):
+					item = manager.query(models.Item).filter_by(item_id=item_id, bucket_id=bucketlist.buck_id).first()
+					if item:
+						manager.delete(item)
+						manager.commit()
 
-				return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' has been deleted'})
+						return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' has been deleted'})
+					else:
+						return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' doesnt exist'})
+				else:
+					return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' doesnt exist'})
 			else:
-				return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' doesnt exist'})
+				return jsonify(access_denied)
 		else:
 			return jsonify({'message': 'Bucket of id ' + str(id) + ' doesnt exist'})
 
