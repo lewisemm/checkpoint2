@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 from flask import current_app
-from flask.ext.login import UserMixin
+# from flask.ext.login import UserMixin
 
 from passlib.apps import custom_app_context as pwd_context
 
@@ -33,13 +33,13 @@ class Item(Base):
 	
 	item_id = Column(Integer, primary_key=True)
 	name = Column(String(100), nullable=False)
-	date_created = Column(DateTime, default=func.now())
-	date_modified = Column(DateTime, default=func.now())
+	date_created = Column(DateTime, nullable=False, default=func.now())
+	date_modified = Column(DateTime, nullable=False, default=func.now())
 	done = Column(Boolean, default=False)
 	bucket_id = Column(Integer, ForeignKey('bucketlist.buck_id'))
 	bucketlist = relationship('BucketList')
 
-class User(Base, UserMixin):
+class User(Base):
 	__tablename__ = 'users'
 	id = Column(Integer, primary_key=True)
 	username = Column(String(30), index=True, unique=True)
