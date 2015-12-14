@@ -6,33 +6,33 @@
    * **`passlib`** - It's used to hash the user's plain text password. Also used to identify a user from a given token
    * **`itsdangerous`** - It's used to generate tokens from users and identify users from tokens.
    * **`Flask-RESTful`** - It's used to organise resources into class based views
-   * **`Flask-HttpAuth`** - It's used to handle user authentication. This API improvises this ability to help authenticate users via tokens.
-   * **`sqlalchemy`** - The ORM that's used to transate database tables into language objects through the use of models. It also handles CRUD operations and datanase configurations
+   * **`Flask-HttpAuth`** - It's used to handle user authentication. This API improvises this library's features to help authenticate users via tokens.
+   * **`sqlalchemy`** - The ORM that's used to transate database tables into language objects through the use of models. It also handles CRUD operations and database configurations
 
 ## Routes
 * **`/auth/login`**
   * Method - POST
-    * Logs a user in
+    * Verifies a user's credentials and generates a token for use in the API thereafter.
 * **`/auth/logout`**
   * Method - GET
-    * Logs a user out
+    * Logs a user out.
 * **`/bucketlists/`**
   * Method - POST
-    * Create a new bucket list
+    * Create a new bucket list.
   * Method - GET
-    * List all the bucket lists that have been created
+    * Lists all the bucket lists that have been created in the API.
 * **`/bucketlists/<id>`**
   * Method - GET
-    * Get a single bucket list
+    * Gets the bucketlist whose id is equivalent to the `<id>` in the URL.
   * Method - PUT
-    * Update this bucket list
+    * Updates the bucketlist whose id is equivalent to the `<id>` in the URL.
   * Method - DELETE
-    * Delete this single bucket list
+    * Deletes the bucketlist whose id is equivalent to the `<id>` in the URL.
 * **`/bucketlists/<id>/items/`**
   * Method - POST
-    * Creates a new item in a bucket list
+    * Creates a new item in the bucketlist whose id is equivalent to the `<id>` in the URL.
 * **`/bucketlists/<id>/items/<item_id>`**
   * Method - PUT
-    * Updates a bucket list item
+    * Updates the item of id `<item_id>` in the bucketlist whose id is equivalent to the `<id>` in the URL.
   * Method - DELETE
-    * Deletes an item in a bucket list
+    * Deletes the item of id `<item_id` in the bucketlist whose id is equivalent to the `<id>` in the URL.

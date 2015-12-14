@@ -1,7 +1,9 @@
 import os
 
 from flask import Flask, render_template, Markup, request, redirect, url_for, flash, g
-from flask_restful import Resource, Api, reqparse
+
+from flask_restful import Resource, Api, reqparse, fields, marshal_with
+
 from flask.json import jsonify
 
 from flask_httpauth import HTTPBasicAuth
@@ -18,20 +20,12 @@ app.config.update(SECRET_KEY=os.environ['SECRET_KEY'])
 
 auth = HTTPBasicAuth()
 
-# login_manager = LoginManager()
-# login_manager.init_app(app)
-
-
 engine = create_engine(os.environ['DATABASE_URL'])
 session = sessionmaker()
 session.configure(bind=engine)
 manager = session()
 
 access_denied = {'message': 'Access denied!'}
-
-# @login_manager.user_loader
-# def load_user(user_id):
-# 	return manager.query(models.User).filter_by(id=user_id).first()
 
 def get_request_token():
 	return request.headers.get('username')
@@ -80,6 +74,22 @@ def registration():
 
 
 class BucketList(Resource):
+	item_fields = {
+		'id': fields.Integer(attribute='item_id'),
+		'name': fields.String,
+		'date_created': fields.String,
+		'date_modified': fields.String,
+		'done': fields.Boolean
+	}
+
+	bucketlist_fields = {
+		'id': fields.Integer(attribute='buck_id'),
+		'name': fields.String,
+		'items': fields.Nested(item_fields),
+		'date_created': fields.String,
+		'date_modified': fields.String,
+		'created_by': fields.String
+	}
 
 	@auth.login_required
 	def post(self):
@@ -99,37 +109,31 @@ class BucketList(Resource):
 			return jsonify({'error': str(e)})
 
 	@auth.login_required
+	@marshal_with(bucketlist_fields)
 	def get(self, limit=20):
 		result = manager.query(models.BucketList).order_by(desc(models.BucketList.date_created)).all()
-
-		res_json = []
-		for bucket in result:
-			current_bucket = {}
-			current_items = {}
-			current_bucket['id'] = bucket.buck_id
-			current_bucket['name'] = bucket.name
-
-			item_in_bucket = manager.query(models.Item).filter(models.Item.bucket_id==bucket.buck_id).order_by(desc(models.Item.date_created)).all()
-			current_bucket['items'] = []
-			for item in item_in_bucket:
-				current_items['id'] = item.item_id
-				current_items['name'] = item.name
-				current_items['date_created'] = str(item.date_created)
-				current_items['date_modified'] = str(item.date_modified)
-				current_items['done'] = item.done
-			if current_items:
-				current_bucket['items'].append(current_items)
-				
-			current_bucket['date_created'] = str(bucket.date_created)
-			current_bucket['date_modified'] = str(bucket.date_modified)
-			current_bucket['created_by'] = bucket.created_by
-			res_json.append(current_bucket)
-		return jsonify({'bucketlists': res_json})
-
+		return result
+		
 api.add_resource(BucketList, '/bucketlists/')
 
-
 class BucketListID(Resource):
+	item_fields = {
+		'id': fields.Integer(attribute='item_id'),
+		'name': fields.String,
+		'date_created': fields.String,
+		'date_modified': fields.String,
+		'done': fields.Boolean
+	}
+
+	bucketlist_fields = {
+		'id': fields.Integer(attribute='buck_id'),
+		'name': fields.String,
+		'items': fields.Nested(item_fields),
+		'date_created': fields.String,
+		'date_modified': fields.String,
+		'created_by': fields.String
+	}
+
 	@auth.login_required
 	def put(self, id):
 		try:
@@ -153,30 +157,12 @@ class BucketListID(Resource):
 			return {'error': str(e)}
 
 	@auth.login_required
+	@marshal_with(bucketlist_fields)
 	def get(self, id):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		
 		if bucketlist:
-			current_bucket = {}
-			current_bucket['id'] = bucketlist.buck_id
-			current_bucket['name'] = bucketlist.name
-
-			current_bucket['items'] = []
-			items_in_bucket = manager.query(models.Item).filter_by(bucket_id=bucketlist.buck_id)
-			for item in items_in_bucket:
-				current_item = {}
-				current_item['name'] = item.name
-				current_item['date_created'] = str(item.date_created)
-				current_item['date_modified'] = str(item.date_modified)
-				current_item['done'] = item.done
-
-				current_bucket['items'].append(current_item)
-
-			current_bucket['date_created'] = str(bucketlist.date_created)
-			current_bucket['date_modified'] = str(bucketlist.date_modified)
-			current_bucket['created_by'] = bucketlist.created_by
-	
-			return jsonify({'bucketlist': current_bucket})
+			return bucketlist
 		else:
 			return jsonify({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
 	
@@ -204,9 +190,9 @@ api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
 
 class BucketListItems(Resource):
+	
 	@auth.login_required
 	def post(self, id):
-
 		# check if bucketlist exists
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 
@@ -271,31 +257,30 @@ class BucketListItemsID(Resource):
 
 api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:item_id>')
 
-@app.route('/index', methods=['GET'])
-def index():
-	return render_template('index.html', error=None)
-
 @app.route('/auth/login', methods=['GET', 'POST'])
 def login():
 	if request.method == 'GET':
 		return render_template('login.html', error=None)
 	
 	elif request.method == 'POST':
+		parser = reqparse.RequestParser()
+		parser.add_argument('username')
+		parser.add_argument('password')
 
-		username = request.form.get('username')
-		password = request.form.get('password')
+		args = parser.parse_args()
+		username = args.get('username')
+		password = args.get('password')
 
 		user = manager.query(models.User).filter_by(username=username).first()
-
-		if not user:
-			return render_template('login.html', error='That username does not exist!')
-		else:
+		if user:
 			if user.verify_password(password):
 				token = user.generate_auth_token()
 				decoded = token.decode('ascii')
 				return jsonify({'token': decoded})
 			else:
 				return render_template('login.html', error='Invalid password!')
+		else:
+			return render_template('login.html', error='That username does not exist!')
 		
 @app.route('/auth/logout', methods=['GET'])
 @auth.login_required

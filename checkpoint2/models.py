@@ -18,15 +18,12 @@ Base = declarative_base()
 class BucketList(Base):
 	__tablename__ = 'bucketlist'
 
-	# def __init__(self, name, created_by):
-	# 	self.name = name
-	# 	self.created_by=created_by
-
 	buck_id = Column(Integer, primary_key=True)
 	name = Column(String(100), nullable=False)
 	date_created = Column(DateTime, nullable=False, default=func.now())
 	date_modified = Column(DateTime, nullable=False, default=func.now())
 	created_by = Column(String(100), nullable=False, default='Unauthenticated')
+	items = relationship("Item")
 
 class Item(Base):
 	__tablename__ = 'item'
