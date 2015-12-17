@@ -52,6 +52,7 @@ def verify_password(username_or_token, password):
 	else:
 		return False
 
+
 class Registration(Resource):
 	def post(self):
 
@@ -214,23 +215,21 @@ class BucketListItems(Resource):
 	def post(self, id):
 		# check if bucketlist exists
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
-
-
-
 		if bucketlist:
-			parser = reqparse.RequestParser()
-			parser.add_argument('name')
-			args = parser.parse_args()
-			name = args['name']
+			if is_bucketlist_owner(bucketlist):
+				parser = reqparse.RequestParser()
+				parser.add_argument('name')
+				args = parser.parse_args()
+				name = args['name']
 
-			item = models.Item(name=name, bucket_id=bucketlist.buck_id)
-			manager.add(item)
-			manager.commit()
-
-			# return jsonify({'message': 'Item added to bucketlist id ' + str(id)}), 201
-			return item, 201
+				item = models.Item(name=name, bucket_id=bucketlist.buck_id)
+				manager.add(item)
+				manager.commit()
+				return item, 201
+			else:
+				return access_denied, 403
 		else:
-			return jsonify({'bucketlist': 'Bucket of id ' + str(id) + ' doesnt exist'})
+			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 api.add_resource(BucketListItems, '/bucketlists/<int:id>/items/')
 
@@ -242,43 +241,42 @@ class BucketListItemsID(Resource):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
 			if is_bucketlist_owner(bucketlist):
-				json_data = request.get_json()
+				parser = reqparse.RequestParser()
+				parser.add_argument('name')
+				parser.add_argument('done')
+				args = parser.parse_args()
+
 				item = manager.query(models.Item).filter_by(item_id=item_id).first()
-				item.name = json_data['name']
+				item.name = args['name']
 				item.date_modified = func.now()
-				if json_data['done'] == 'True':
+				if args['done'] == 'True':
 					item.done = True
-				elif json_data['done'] == 'False':
+				elif args['done'] == 'False':
 					item.done = False
 				manager.add(item)
 				manager.commit()
-				return jsonify({'message': 'Item of id ' + str(item_id) + ' from bucket of id ' + str(id) + ' has been updated'})
+				return {'message': "Item of id " + str(item_id) + " from bucket of id " + str(id) + " has been updated"}, 200
 			else:
-				return jsonify(access_denied)
+				return access_denied, 403
 		else:
-			return jsonify({'message': 'Bucket of id ' + str(id) + ' doesnt exist'})
-
+			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 	@auth.login_required
 	def delete(self, id, item_id):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
 			if is_bucketlist_owner(bucketlist):
-				if is_bucketlist_owner(bucketlist):
-					item = manager.query(models.Item).filter_by(item_id=item_id, bucket_id=bucketlist.buck_id).first()
-					if item:
-						manager.delete(item)
-						manager.commit()
-
-						return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' has been deleted'})
-					else:
-						return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' doesnt exist'})
+				item = manager.query(models.Item).filter_by(item_id=item_id, bucket_id=bucketlist.buck_id).first()
+				if item:
+					manager.delete(item)
+					manager.commit()
+					return {'message': 'Item of id ' + str(item_id) + ' in bucketlist of id ' + str(id) + ' has been deleted'}, 200
 				else:
-					return jsonify({'message': 'Item of id ' + str(item_id) + ' in bucket of id ' + str(id) + ' doesnt exist'})
+					return {'message': "Item of id " + str(item_id) + " in bucketlist of id " + str(id) + " doesn't exist"}, 404
 			else:
-				return jsonify(access_denied)
+				return access_denied, 403
 		else:
-			return jsonify({'message': 'Bucket of id ' + str(id) + ' doesnt exist'})
+			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:item_id>')
 

@@ -20,7 +20,6 @@ def register_and_login_user(client):
 	response = client.post('/user/registration', data={'username':username, 'password':password})
 	# login the user
 	response = client.post('/auth/login', data={'username':username, 'password':password})
-	import ipdb; ipdb.set_trace()
 
 	token = json.loads(response.data).get('token')
 
