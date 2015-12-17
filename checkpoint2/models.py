@@ -65,6 +65,12 @@ class User(Base):
 		user = manager.query(User).get(data['id'])
 		return user
 
-if __name__ == '__main__':
-	engine = create_engine(os.environ['DATABASE_URL'], echo=True)
+def init_db(db_url=None):
+	if db_url:
+		engine = create_engine(db_url)
+	else:
+		engine = create_engine(os.environ.get('DATABASE_URL'))
 	Base.metadata.create_all(engine)
+
+if __name__ == '__main__':
+	init_db()
