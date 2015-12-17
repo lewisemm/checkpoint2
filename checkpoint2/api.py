@@ -1,7 +1,6 @@
 import os
 
-from flask import Flask, render_template, Markup, request, redirect, url_for, flash, g, abort
-from flask.json import jsonify
+from flask import Flask, request
 
 from flask_restful import Resource, Api, reqparse, fields, marshal_with
 
@@ -53,27 +52,34 @@ def verify_password(username_or_token, password):
 	else:
 		return False
 
-@app.route('/user/registration', methods=['GET', 'POST'])
-def registration():
-	if request.method == 'GET':
-		return render_template('register.html', error=None)
-	elif request.method == 'POST':
-		try:
-			json_data = request.get_json()
-			username = str(json_data['username'])
-			password = str(json_data['password'])
-			if username is None or password is None:
-				return render_template('register.html', error='Username and/or password missing!')
-			exists = manager.query(models.User).filter_by(username = username).first()
-			if exists:
-				return render_template('register.html', error='User already exists!')
-			user = models.User(username=username)
-			user.hash_password(password)
-			manager.add(user)
-			manager.commit()
-			return render_template('register.html', error='User successfully registered!')
-		except Exception as e:
-			return render_template('register.html', error=e)
+class Registration(Resource):
+	def post(self):
+
+		parser = reqparse.RequestParser()
+		parser.add_argument('username')
+		parser.add_argument('password')
+
+		args = parser.parse_args()
+		username = args['username']
+		password = args['password']
+
+		if username:
+			if password:
+				exists = manager.query(models.User).filter_by(username = username).first()
+				if exists:
+					return {'message': 'User already exists!'}, 403
+			else:
+				return {'message': 'Password missing!'}, 400
+		else:
+			return {'message': 'Username missing!'}, 400
+		
+		user = models.User(username=username)
+		user.hash_password(password)
+		manager.add(user)
+		manager.commit()
+		return {'message': 'User successfully registered!'}, 201
+
+api.add_resource(Registration, '/user/registration')
 
 
 class BucketList(Resource):
@@ -102,21 +108,23 @@ class BucketList(Resource):
 
 		args = parser.parse_args()
 		name = args['name']
+
 		token = get_request_token()
 		created_by = models.User.verify_auth_token(token, manager).username
 
 		bucket = models.BucketList(name=name, created_by=created_by)
 		manager.add(bucket)
 		manager.commit()
-		return bucket
+		return bucket, 201
 
 	@auth.login_required
 	@marshal_with(bucketlist_fields)
 	def get(self, limit=20):
 		result = manager.query(models.BucketList).order_by(desc(models.BucketList.date_created)).all()
-		return result
+		return result, 200
 		
 api.add_resource(BucketList, '/bucketlists/')
+
 
 class BucketListID(Resource):
 	item_fields = {
@@ -153,9 +161,9 @@ class BucketListID(Resource):
 				manager.commit()
 				return bucketlist, 200
 			else:
-				return jsonify(access_denied), 401
+				return access_denied, 403
 		else:
-			return jsonify({'message': 'That bucket list id doesnt exist'}), 404
+			return {'message': "That bucket list id doesn't exist"}, 404
 
 	@auth.login_required
 	@marshal_with(bucketlist_fields)
@@ -182,12 +190,12 @@ class BucketListID(Resource):
 				manager.commit()
 				
 				# status codes cause an error that has something to do with serialization
-				return jsonify({'message': 'Bucket of id ' + str(id) + ' has been deleted'})
+				return {'message': 'Bucket of id ' + str(id) + ' has been deleted'}, 200
 			else:
 				pass
-				return jsonify(access_denied)
+				return access_denied, 403
 		else:
-			return jsonify({'message': 'Bucket of id ' + str(id) + ' doesnt exist'})
+			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
@@ -274,12 +282,9 @@ class BucketListItemsID(Resource):
 
 api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:item_id>')
 
-@app.route('/auth/login', methods=['GET', 'POST'])
-def login():
-	if request.method == 'GET':
-		return render_template('login.html', error=None)
-	
-	elif request.method == 'POST':
+
+class Login(Resource):
+	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument('username')
 		parser.add_argument('password')
@@ -293,11 +298,13 @@ def login():
 			if user.verify_password(password):
 				token = user.generate_auth_token()
 				decoded = token.decode('ascii')
-				return jsonify({'token': decoded}), 200
+				return {'token': decoded}, 200
 			else:
-				return render_template('login.html', error='Invalid password!'), 400
+				return {'message': 'Invalid password!'}, 400
 		else:
-			return render_template('login.html', error='That username does not exist!'), 400
+			return {'message': 'That username does not exist!'}, 400
+
+api.add_resource(Login, '/auth/login')
 		
 @app.route('/auth/logout', methods=['GET'])
 @auth.login_required
