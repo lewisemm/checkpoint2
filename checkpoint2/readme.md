@@ -3,7 +3,7 @@
 ## Bucketlist API
 
 ### Introduction
-* The bucketlist application API is built on top of `Flask` framework and makes use of several `libraries` to enhance its functionality.
+* The bucketlist application API is built on top of [Flask](http://flask.pocoo.org) framework and makes use of several `libraries` to enhance its functionality.
 * The `libraries` in use include;
    * **`passlib`** - It's used to hash the user's plain text password. Also used to verify plain text passwords from the client against the hashes in the database.
    * **`itsdangerous`** - It's used to generate tokens from users once they log in. It's also used to identify users from tokens when authentication (in methods annotated with `@auth.login_verified`) is required.
@@ -13,6 +13,22 @@
    * **`fake-factory`** - This API employs the use of this library in the unittests. It generates random values for input when testing.
    * **`ipdb`** - A Python debugger. It's used to help intercept, understand and detect bugs in code during the development process.
    * **`MySQL-python`** - The Python MySQL connector. This is the package that enables connections to be made to the underlying `MySQL` development database.
+
+### Installation
+* Navigate to your directory of choice on terminal.
+* Clone this repository.
+  * Using ssh;
+    * `git clone git@github.com:andela-lkabui/checkpoints.git`
+  * Using http;
+    * `https://github.com/andela-lkabui/checkpoints.git`
+* Install the project's library dependencies. Navigate to the root folder of the project and run the following command.
+  * `pip install -r requirements.txt'
+* Install the project's database dependencies.
+  * Install [MySQL](https://www.mysql.com/downloads/) - development database
+  * Install [sqlite](https://www.sqlite.org/download.html) - testing database
+* **```Note: The project doesn't impose any restrictictions regarding the use of these two databases. Any relational database should work. These are just databases that were used during the developent and testing stages and thus don't require extra libraries to be installed.```**
+* To run the app;
+  * `python api.py`
 
 ### Routes, Methods and Functionality
 * **`/user/registration`**

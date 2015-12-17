@@ -5,7 +5,7 @@ import sqlite3
 from sqlalchemy import create_engine
 from faker import Factory
 
-from models import init_db
+from models.models import init_db
 
 import api
 

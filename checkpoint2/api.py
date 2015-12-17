@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, MetaData, desc, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.serializer import loads, dumps
 
-import models
+from models import models
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
