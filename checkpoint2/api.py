@@ -173,7 +173,7 @@ class BucketListID(Resource):
 		if bucketlist:
 			return bucketlist, 200
 		else:
-			return jsonify({'message': 'Bucket of id ' + str(id) + ' doesnt exist'}), 404
+			return {'message': 'Bucket of id ' + str(id) + ' doesnt exist'}, 404
 	
 	@auth.login_required
 	def delete(self, id):

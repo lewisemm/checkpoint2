@@ -50,7 +50,7 @@ class TestRegistrationLoginLogout(unittest.TestCase):
 		"""
 		response = self.client.post('/user/registration', data={'username':fake.user_name(), 'password':fake.password()})
 		self.assertTrue('User successfully registered!' in response.data)
-		self.assertEqual(response.status, '200 OK')
+		self.assertEqual(response.status, '201 CREATED')
 
 	def test_login_no_user_account(self):
 		"""

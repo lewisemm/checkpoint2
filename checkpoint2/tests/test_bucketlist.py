@@ -102,7 +102,7 @@ class TestBucketList(unittest.TestCase):
 
 		token = register_and_login_user(self.client)
 		response = self.client.post('/bucketlists/', data=bucketlist1, headers={'username':token})
-		self.assertEqual(response.status, '200 OK')
+		self.assertEqual(response.status, '201 CREATED')
 
 		resp_dict = json.loads(response.data)
 		self.assertEqual(resp_dict.get('name'), bucketlist1.get('name'))
