@@ -120,11 +120,18 @@ class BucketList(Resource):
 
 	@auth.login_required
 	@marshal_with(bucketlist_fields)
-	def get(self, limit=20):
-		result = manager.query(models.BucketList).order_by(desc(models.BucketList.date_created)).all()
-		return result, 200
-		
-api.add_resource(BucketList, '/bucketlists/')
+	def get(self, limit=20, q=None):
+		if q:
+			result = manager.query(models.BucketList).filter_by(name=q).order_by(desc(models.BucketList.date_created)).all()
+			if result:
+				return result, 200
+			else:
+				return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
+		else:
+			result = manager.query(models.BucketList).order_by(desc(models.BucketList.date_created)).all()
+			return result, 200
+
+api.add_resource(BucketList, '/bucketlists/', '/bucketlists/<q>')
 
 
 class BucketListID(Resource):
@@ -247,12 +254,14 @@ class BucketListItemsID(Resource):
 				args = parser.parse_args()
 
 				item = manager.query(models.Item).filter_by(item_id=item_id).first()
-				item.name = args['name']
+				if args['name']:
+					item.name = args['name']
 				item.date_modified = func.now()
-				if args['done'] == 'True':
-					item.done = True
-				elif args['done'] == 'False':
-					item.done = False
+				if args['done']:
+					if args['done'] == 'True':
+						item.done = True
+					elif args['done'] == 'False':
+						item.done = False
 				manager.add(item)
 				manager.commit()
 				return {'message': "Item of id " + str(item_id) + " from bucket of id " + str(id) + " has been updated"}, 200
