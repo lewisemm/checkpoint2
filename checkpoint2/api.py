@@ -2,13 +2,16 @@ import os
 
 from flask import Flask, request
 
-from flask_restful import Resource, Api, reqparse, fields, marshal_with
+from flask_restful import Resource, Api, reqparse, fields, marshal
 
 from flask_httpauth import HTTPBasicAuth
 
 from sqlalchemy import create_engine, MetaData, desc, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.serializer import loads, dumps
+
+from sqlalchemy_paginator import Paginator
+from sqlalchemy_paginator.exceptions import EmptyPage
 
 from models import models
 
@@ -39,6 +42,12 @@ def is_bucketlist_owner(bucketlist):
 		return True
 	else:
 		return False
+
+def paging(fields, paginator, page):
+		try:
+			return marshal(paginator.page(page).object_list, fields), 200 
+		except EmptyPage:
+			return {'message': "Page doesn't exist"}, 404
 
 @auth.verify_password
 def verify_password(username_or_token, password):
@@ -84,25 +93,26 @@ api.add_resource(Registration, '/user/registration')
 
 
 class BucketList(Resource):
-	item_fields = {
-		'id': fields.Integer(attribute='item_id'),
-		'name': fields.String,
-		'date_created': fields.String,
-		'date_modified': fields.String,
-		'done': fields.Boolean
-	}
 
-	bucketlist_fields = {
-		'id': fields.Integer(attribute='buck_id'),
-		'name': fields.String,
-		'items': fields.Nested(item_fields),
-		'date_created': fields.String,
-		'date_modified': fields.String,
-		'created_by': fields.String
-	}
+	def __init__(self):
+		item_fields = {
+			'id': fields.Integer(attribute='item_id'),
+			'name': fields.String,
+			'date_created': fields.String,
+			'date_modified': fields.String,
+			'done': fields.Boolean
+		}
+
+		self.bucketlist_fields = {
+			'id': fields.Integer(attribute='buck_id'),
+			'name': fields.String,
+			'items': fields.Nested(item_fields),
+			'date_created': fields.String,
+			'date_modified': fields.String,
+			'created_by': fields.String
+		}
 	
 	@auth.login_required
-	@marshal_with(bucketlist_fields)
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument('name')
@@ -116,45 +126,69 @@ class BucketList(Resource):
 		bucket = models.BucketList(name=name, created_by=created_by)
 		manager.add(bucket)
 		manager.commit()
-		return bucket, 201
+		return marshal(bucket, self.bucketlist_fields), 201
 
 	@auth.login_required
-	@marshal_with(bucketlist_fields)
-	def get(self, limit=20):
-		q = request.args.get('q')
-		if q:
-			result = manager.query(models.BucketList).filter_by(name=q).order_by(desc(models.BucketList.date_created)).all()
-			if result:
-				return result, 200
-			else:
-				return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
+	def get(self, page=1):
+		if page <1 or page > 100:
+				return {'message': 'Page number is out of range (max=100)'}, 403
 		else:
-			result = manager.query(models.BucketList).order_by(desc(models.BucketList.date_created)).all()
-			return result, 200
+			try:
+				# Get the limit specified by the client
+				limit = int(request.args.get('limit', 20))
+			except ValueError:
+				# If limit specified by client isn't number type, ignore
+				# that and default to 20
+				limit = 20
 
-api.add_resource(BucketList, '/bucketlists/')
+			# if limit is greater than maximum, default to 100
+			if limit > 100:
+				limit = 100
+
+			current_user = models.User.verify_auth_token(get_request_token(), manager)
+
+			# the "search bucketlist by name" parameter
+			q = request.args.get('q')
+			if q:
+				result = manager.query(models.BucketList).filter_by(name=q, created_by=current_user.username).order_by(desc(models.BucketList.date_created))#.all()
+				if result:
+					paginator = Paginator(result, limit)
+					paged_response = paging(self.bucketlist_fields, paginator, page)
+					return paged_response
+				else:
+					return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
+			else:
+				# when a "search bucketlist by name parameter" hasn't been specified
+				result = manager.query(models.BucketList).filter_by(created_by=current_user.username).order_by(desc(models.BucketList.date_created))#.all()
+				paginator = Paginator(result, limit)
+				# return the first page of the results by default
+				paged_response = paging(self.bucketlist_fields, paginator, page)
+				return paged_response
+
+api.add_resource(BucketList, '/bucketlists/', '/bucketlists/page/<int:page>')
 
 
 class BucketListID(Resource):
-	item_fields = {
-		'id': fields.Integer(attribute='item_id'),
-		'name': fields.String,
-		'date_created': fields.String,
-		'date_modified': fields.String,
-		'done': fields.Boolean
-	}
 
-	bucketlist_fields = {
-		'id': fields.Integer(attribute='buck_id'),
-		'name': fields.String,
-		'items': fields.Nested(item_fields),
-		'date_created': fields.String,
-		'date_modified': fields.String,
-		'created_by': fields.String
-	}
+	def __init__(self):
+		item_fields = {
+			'id': fields.Integer(attribute='item_id'),
+			'name': fields.String,
+			'date_created': fields.String,
+			'date_modified': fields.String,
+			'done': fields.Boolean
+		}
+
+		self.bucketlist_fields = {
+			'id': fields.Integer(attribute='buck_id'),
+			'name': fields.String,
+			'items': fields.Nested(item_fields),
+			'date_created': fields.String,
+			'date_modified': fields.String,
+			'created_by': fields.String
+		}
 
 	@auth.login_required
-	@marshal_with(bucketlist_fields)
 	def put(self, id):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 
@@ -168,18 +202,17 @@ class BucketListID(Resource):
 				bucketlist.date_modified = func.now()
 				manager.add(bucketlist)
 				manager.commit()
-				return bucketlist, 200
+				return marshal(bucketlist, self.bucketlist_fields), 200
 			else:
 				return access_denied, 403
 		else:
 			return {'message': "That bucket list id doesn't exist"}, 404
 
 	@auth.login_required
-	@marshal_with(bucketlist_fields)
 	def get(self, id):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
-			return bucketlist, 200
+			return marshal(bucketlist, self.bucketlist_fields), 200
 		else:
 			return {'message': 'Bucket of id ' + str(id) + ' doesnt exist'}, 404
 	
@@ -198,10 +231,8 @@ class BucketListID(Resource):
 				manager.delete(bucketlist)
 				manager.commit()
 				
-				# status codes cause an error that has something to do with serialization
 				return {'message': 'Bucket of id ' + str(id) + ' has been deleted'}, 200
 			else:
-				pass
 				return access_denied, 403
 		else:
 			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
@@ -210,16 +241,17 @@ api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
 
 class BucketListItems(Resource):
-	item_fields = {
-		'id': fields.Integer(attribute='item_id'),
-		'name': fields.String,
-		'date_created': fields.String,
-		'date_modified': fields.String,
-		'done': fields.Boolean
-	}
+
+	def __init__(self):
+		self.item_fields = {
+			'id': fields.Integer(attribute='item_id'),
+			'name': fields.String,
+			'date_created': fields.String,
+			'date_modified': fields.String,
+			'done': fields.Boolean
+		}
 	
 	@auth.login_required
-	@marshal_with(item_fields)
 	def post(self, id):
 		# check if bucketlist exists
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
@@ -233,7 +265,7 @@ class BucketListItems(Resource):
 				item = models.Item(name=name, bucket_id=bucketlist.buck_id)
 				manager.add(item)
 				manager.commit()
-				return item, 201
+				return marshall(item, self.item_fields), 201
 			else:
 				return access_denied, 403
 		else:
@@ -243,6 +275,16 @@ api.add_resource(BucketListItems, '/bucketlists/<int:id>/items/')
 
 
 class BucketListItemsID(Resource):
+
+	def __init__(self):
+		self.item_fields = {
+			'id': fields.Integer(attribute='item_id'),
+			'name': fields.String,
+			'date_created': fields.String,
+			'date_modified': fields.String,
+			'done': fields.Boolean
+		}
+
 	@auth.login_required
 	def put(self, id, item_id):
 		# check if bucketlist exists
@@ -265,7 +307,7 @@ class BucketListItemsID(Resource):
 						item.done = False
 				manager.add(item)
 				manager.commit()
-				return {'message': "Item of id " + str(item_id) + " from bucket of id " + str(id) + " has been updated"}, 200
+				return marshal(item, self.item_fields), 200
 			else:
 				return access_denied, 403
 		else:
