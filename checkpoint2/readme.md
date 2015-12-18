@@ -22,12 +22,12 @@
   * Using http;
     * `https://github.com/andela-lkabui/checkpoints.git`
 * Install the project's library dependencies. Navigate to the root folder of the project and run the following command.
-  * `pip install -r requirements.txt'
+  * `pip install -r requirements.txt`
 * Install the project's database dependencies.
   * Install [MySQL](https://www.mysql.com/downloads/) - development database
   * Install [sqlite](https://www.sqlite.org/download.html) - testing database
-* **```Note: The project doesn't impose any restrictictions regarding the use of these two databases. Any relational database should work. These are just databases that were used during the developent and testing stages and thus don't require extra libraries to be installed.```**
-* To run the app;
+* **```Note: The project doesn't impose any restrictictions regarding the use of these two databases. Any relational database should work. These are just the databases that were used during the development and testing stages and thus don't require extra libraries to be installed.```**
+* To run the app, run the following command;
   * `python api.py`
 
 ### Routes, Methods and Functionality
