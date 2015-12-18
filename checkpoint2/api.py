@@ -120,7 +120,8 @@ class BucketList(Resource):
 
 	@auth.login_required
 	@marshal_with(bucketlist_fields)
-	def get(self, limit=20, q=None):
+	def get(self, limit=20):
+		q = request.args.get('q')
 		if q:
 			result = manager.query(models.BucketList).filter_by(name=q).order_by(desc(models.BucketList.date_created)).all()
 			if result:
@@ -131,7 +132,7 @@ class BucketList(Resource):
 			result = manager.query(models.BucketList).order_by(desc(models.BucketList.date_created)).all()
 			return result, 200
 
-api.add_resource(BucketList, '/bucketlists/', '/bucketlists/<q>')
+api.add_resource(BucketList, '/bucketlists/')
 
 
 class BucketListID(Resource):
