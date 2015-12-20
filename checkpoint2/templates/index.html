@@ -1,8 +1,0 @@
-{% extends "layout.html" %}
-{% block body %}
-  <h2>Index</h2>
-  {% if current_user.is_authenticated %}
-    Hi {{ current_user.username }}!
-  {% endif %}
-
-{% endblock %}
