@@ -13,6 +13,7 @@
    * **`fake-factory`** - This API employs the use of this library in the unittests. It generates random values for input when testing.
    * **`ipdb`** - A Python debugger. It's used to help intercept, understand and detect bugs in code during the development process.
    * **`MySQL-python`** - The Python MySQL connector. This is the package that enables connections to be made to the underlying `MySQL` development database.
+   * **`SQLAlchemy-Paginator`** - A pagination library that receives an `sqlalchemy query object` as its first argument and a `limit (results per page in int)` as the second argument and creates a pagination object through which the query's content can be accessed through pages.
 
 ### Installation
 * Navigate to your directory of choice on terminal.

@@ -44,10 +44,10 @@ def is_bucketlist_owner(bucketlist):
 		return False
 
 def paging(fields, paginator, page):
-		try:
-			return marshal(paginator.page(page).object_list, fields), 200 
-		except EmptyPage:
-			return {'message': "Page doesn't exist"}, 404
+	try:
+		return marshal(paginator.page(page).object_list, fields), 200 
+	except EmptyPage:
+		return {'message': "Page doesn't exist"}, 404
 
 @auth.verify_password
 def verify_password(username_or_token, password):
@@ -91,6 +91,9 @@ class Registration(Resource):
 
 api.add_resource(Registration, '/user/registration')
 
+class Limit():
+	limit = 20
+
 
 class BucketList(Resource):
 
@@ -130,20 +133,27 @@ class BucketList(Resource):
 
 	@auth.login_required
 	def get(self, page=1):
-		if page <1 or page > 100:
+		if page < 1 or page > 100:
 				return {'message': 'Page number is out of range (max=100)'}, 403
 		else:
 			try:
 				# Get the limit specified by the client
-				limit = int(request.args.get('limit', 20))
+				limit = int(request.args.get('limit', 0))
 			except ValueError:
 				# If limit specified by client isn't number type, ignore
 				# that and default to 20
 				limit = 20
 
-			# if limit is greater than maximum, default to 100
-			if limit > 100:
-				limit = 100
+			if limit:
+				# if limit is greater than maximum, default to 100
+				if limit > 100:
+					Limit.limit = 100
+				elif limit < 1:
+				# if limit is <= 0, default to 20
+					Limit.limit = 20
+				else:
+					Limit.limit = limit
+			
 
 			current_user = models.User.verify_auth_token(get_request_token(), manager)
 
@@ -152,20 +162,20 @@ class BucketList(Resource):
 			if q:
 				result = manager.query(models.BucketList).filter_by(name=q, created_by=current_user.username).order_by(desc(models.BucketList.date_created))#.all()
 				if result:
-					paginator = Paginator(result, limit)
+					paginator = Paginator(result, Limit.limit)
 					paged_response = paging(self.bucketlist_fields, paginator, page)
 					return paged_response
 				else:
 					return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
 			else:
-				# when a "search bucketlist by name parameter" hasn't been specified
+				# when no parameter has been specified
 				result = manager.query(models.BucketList).filter_by(created_by=current_user.username).order_by(desc(models.BucketList.date_created))#.all()
-				paginator = Paginator(result, limit)
+				paginator = Paginator(result, Limit.limit)
 				# return the first page of the results by default
 				paged_response = paging(self.bucketlist_fields, paginator, page)
 				return paged_response
 
-api.add_resource(BucketList, '/bucketlists/', '/bucketlists/page/<int:page>')
+api.add_resource(BucketList, '/bucketlists/page/<int:page>', '/bucketlists/')
 
 
 class BucketListID(Resource):
