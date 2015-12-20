@@ -5,8 +5,13 @@ python:
 
 before_install:
   - "pip install -r requirements.txt"
+install:
+  - "pip install coveralls"
 script:
-  - python -m unittest discover tests
+  # - python -m unittest discover tests
+  - coverage run --source=tests setup.py test
+after_success:
+  - coveralls
 branches:
   only:
   - develop
