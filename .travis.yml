@@ -2,10 +2,6 @@
 language: python
 python:
   - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "3.5"
 
 before_install:
   - "pip install -r requirements.txt"
@@ -14,6 +10,10 @@ script:
 branches:
   only:
   - develop
+services:
+  - mysql
 env:
   global:
     - APP_SETTINGS='config.config.DevelopmentConfig'
+    - SECRET_KEY='This3249jkey123921ijuihisbnsup12wp1w2osejndd2bdsd9i239se5386523cre213tsasd'
+    - DATABASE_URL='mysql://travis:""@127.0.0.1:3306/checkpoint2'
