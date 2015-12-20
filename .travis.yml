@@ -14,3 +14,6 @@ script:
 branches:
   only:
   - develop
+env:
+  global:
+    - APP_SETTINGS='config.config.DevelopmentConfig'
