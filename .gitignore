@@ -4,3 +4,4 @@ data/*.txt
 *.db
 env
 .env
+.coverage
