@@ -170,47 +170,45 @@ class BucketList(Resource):
 		It also allows client specified pagination of results and also has a search bucketlist by name option.
 		The default pagination of results is 20 items per page unless otherwise specified.
 		"""
-		if page < 1 or page > 100:
-				return {'message': 'Page number is out of range (max=100)'}, 403
-		else:
-			try:
-				# Get the limit specified by the client
-				limit = int(request.args.get('limit', 0))
-			except ValueError:
-				# If limit specified by client isn't number type, ignore
-				# that and default to 20
-				limit = 20
+		
+		try:
+			# Get the limit specified by the client
+			limit = int(request.args.get('limit', 0))
+		except ValueError:
+			# If limit specified by client isn't number type, ignore
+			# that and default to 20
+			limit = 20
 
-			if limit:
-				# if limit is greater than maximum, default to 100
-				if limit > 100:
-					Limit.limit = 100
-				elif limit < 1:
-				# if limit is <= 0, default to 20
-					Limit.limit = 20
-				else:
-					Limit.limit = limit
-			
-
-			current_user = models.User.verify_auth_token(get_request_token(), manager)
-
-			# the "search bucketlist by name" parameter
-			q = request.args.get('q')
-			if q:
-				result = manager.query(models.BucketList).filter_by(name=q, created_by=current_user.username).order_by(desc(models.BucketList.date_created))#.all()
-				if result:
-					paginator = Paginator(result, Limit.limit)
-					paged_response = paging(self.bucketlist_fields, paginator, page)
-					return paged_response
-				else:
-					return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
+		if limit:
+			# if limit is greater than maximum, default to 100
+			if limit > 100:
+				Limit.limit = 100
+			elif limit < 1:
+			# if limit is <= 0, default to 20
+				Limit.limit = 20
 			else:
-				# when no parameter has been specified
-				result = manager.query(models.BucketList).filter_by(created_by=current_user.username).order_by(desc(models.BucketList.date_created))#.all()
+				Limit.limit = limit
+		
+
+		current_user = models.User.verify_auth_token(get_request_token(), manager)
+
+		# the "search bucketlist by name" parameter
+		q = request.args.get('q')
+		if q:
+			result = manager.query(models.BucketList).filter_by(name=q, created_by=current_user.username).order_by(desc(models.BucketList.date_created))
+			if result:
 				paginator = Paginator(result, Limit.limit)
-				# return the first page of the results by default
 				paged_response = paging(self.bucketlist_fields, paginator, page)
 				return paged_response
+			else:
+				return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
+		else:
+			# when no parameter has been specified
+			result = manager.query(models.BucketList).filter_by(created_by=current_user.username).order_by(desc(models.BucketList.date_created))
+			paginator = Paginator(result, Limit.limit)
+			# return the first page of the results by default
+			paged_response = paging(self.bucketlist_fields, paginator, page)
+			return paged_response
 
 api.add_resource(BucketList, '/bucketlists/page/<int:page>', '/bucketlists/')
 
