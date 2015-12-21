@@ -15,6 +15,7 @@ after_success:
 branches:
   only:
   - develop
+  - checkpoint2
 services:
   - mysql
 env:

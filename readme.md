@@ -1,10 +1,8 @@
+[![Build Status](https://travis-ci.org/andela-lkabui/checkpoint2.svg?branch=develop)](https://travis-ci.org/andela-lkabui/checkpoint2)
+[![Coverage Status](https://coveralls.io/repos/andela-lkabui/checkpoint2/badge.svg?branch=develop&service=github)](https://coveralls.io/github/andela-lkabui/checkpoint2?branch=develop)
 # Checkpoint 2
 
 ## Bucketlist API
-
-[![Build Status](https://travis-ci.org/andela-lkabui/checkpoint2.svg?branch=develop)](https://travis-ci.org/andela-lkabui/checkpoint2)
-
-[![Coverage Status](https://coveralls.io/repos/andela-lkabui/checkpoint2/badge.svg?branch=develop&service=github)](https://coveralls.io/github/andela-lkabui/checkpoint2?branch=develop)
 
 ### Introduction
 * The bucketlist application API is built on top of [Flask](http://flask.pocoo.org) framework and makes use of several `libraries` to enhance its functionality.
