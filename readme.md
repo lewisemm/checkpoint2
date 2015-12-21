@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/andela-lkabui/checkpoint2.svg?branch=develop)](https://travis-ci.org/andela-lkabui/checkpoint2)
 [![Coverage Status](https://coveralls.io/repos/andela-lkabui/checkpoint2/badge.svg?branch=develop&service=github)](https://coveralls.io/github/andela-lkabui/checkpoint2?branch=develop)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/060712fe227e4c2387ebd9fee6b7da22/badge.svg)](https://www.quantifiedcode.com/app/project/060712fe227e4c2387ebd9fee6b7da22)
 # Checkpoint 2
 
 ## Bucketlist API

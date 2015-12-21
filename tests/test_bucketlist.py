@@ -1,5 +1,8 @@
-from test_base_class import TestBaseClass, register_and_login_user
 import json
+
+from sqlalchemy_paginator.exceptions import EmptyPage
+
+from test_base_class import TestBaseClass, register_and_login_user
 
 class TestBucketList(TestBaseClass):
 
@@ -65,34 +68,52 @@ class TestBucketList(TestBaseClass):
 		response = self.client.delete('/bucketlists/')
 		self.assertEqual(response.status, '405 METHOD NOT ALLOWED')
 
-	# def test_bucketlist_id_pagination_authorized(self):
-	# 	"""
-	# 	Tests authenticated pagination request to '/bucketlists/<int:id>'.
-	# 	Creates five bucketlists and requests 5 pages from the API.
-	# 	"""
-	# 	# create 5 bucket lists
-	# 	five_bl = []
-	# 	for no in range(5):
-	# 		five_bl.append(dict(name=fake.name()))
+	def test_bucketlist_id_pagination_authorized(self):
+		"""
+		Tests authenticated pagination request to '/bucketlists/'.
+		"""
+		# create 5 bucket lists
+		five_bl = []
+		for no in range(5):
+			five_bl.append(dict(name= self.fake.name()))
 
-	# 	token = register_and_login_user(self.client)
-	# 	# post them to the database
-	# 	for bucketlist in five_bl:
-	# 		self.client.post('/bucketlists/', data=bucketlist, headers={'username':token})
-	# 	# send a paginated get request (one item per page)
-	# 	# response = self.client.get('/bucketlists?limit=1', headers={'username':token})
-	# 	response = get('http://localhost/bucketlists?limit=1', headers={'username': token})
-	# 	# response = self.client.get('/bucketlists?limit=1', headers={'username':token})
-	# 	# iterate through the paged results
-	# 	for no in range(1, 6):
-	# 		response = self.client.get('/bucketlists/page/' + str(no), headers={'username':token})
-	# 		resp_list = json.loads(response.data)
-	# 		# ipdb.set_trace()
-	# 		self.assertEqual(five_bl[no-1].get('name'), resp_list[no-1].get('name'))
-	# 	# check for exception when non-existent is accessed
-	# 	with self.assertRaises(EmptyPage):
-	# 		response = self.client.get('/bucketlists/page/' + str(6), headers={'username':token})
+		token = register_and_login_user(self.client)
+		# post them to the database
+		for bucketlist in five_bl:
+			self.client.post('/bucketlists/', data=bucketlist, headers={'username':token})
+		# send a paginated get request (one item per page)
+		response = self.client.get('/bucketlists/?limit=1', headers={'username':token})
+		# iterate through the paged results
+		for no in range(1, 6):
+			response = self.client.get('/bucketlists/page/' + str(no), headers={'username':token})
+			resp_dict = json.loads(response.data)
+			self.assertEqual(five_bl[no-1].get('name'), resp_dict[0].get('name'))
+		# page 6 doesn't exist
+		response = self.client.get('/bucketlists/page/6', headers={'username':token})
+		self.assertEqual(response.status, '404 NOT FOUND')
+		self.assertTrue("Page doesn't exist" in response.data)
 
+	def test_bucketlist_id_authorized_search_by_name(self):
+		"""
+		Tests fetch and retrieval of bucketlist through provision of a bucketlist name.
+		"""
+		# Create a bucketlist
+		bucketlist = {
+			'name': self.fake.name()
+		}
+
+		token = register_and_login_user(self.client)
+		# post it to the database
+		self.client.post('/bucketlists/', data=bucketlist, headers={'username':token})
+		
+		# provide bucketlist name for searching
+		response = self.client.get('/bucketlists/?q=' + bucketlist.get('name'), headers={'username':token})
+		self.assertEqual(response.status, '200 OK')
+		self.assertTrue(bucketlist.get('name') in response.data)
+		# search a random bucketlist name and don't expect to find it
+		random_username = self.fake.name()
+		response = self.client.get('/bucketlists/?q=' + random_username, headers={'username':token})
+		self.assertTrue("[]" in response.data)
 
 if __name__ == '__main__':
 	unittest.main()
