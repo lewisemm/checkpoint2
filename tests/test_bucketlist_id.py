@@ -12,6 +12,20 @@ class TestBucketListID(TestBaseClass):
 		response = self.client.get('/bucketlists/1')
 		self.assertEqual(response.status, '401 UNAUTHORIZED')
 
+	def test_bucketlist_id_unauthorized_put(self):
+		"""
+		Test unauthenticated put request to url '/bucketlists/<int:id>'.
+		"""
+		response = self.client.put('/bucketlists/1')
+		self.assertEqual(response.status, '401 UNAUTHORIZED')
+
+	def test_bucketlist_id_unauthorized_delete(self):
+		"""
+		Test unauthenticated delete request to url '/bucketlists/<int:id>'.
+		"""
+		response = self.client.delete('/bucketlists/1')
+		self.assertEqual(response.status, '401 UNAUTHORIZED')
+
 	def test_bucketlist_id_authorized(self):
 		"""
 		Test authenticated request to url '/bucketlists/<int:id>'.
@@ -23,8 +37,10 @@ class TestBucketListID(TestBaseClass):
 		# Bucketlist non existent
 		response = self.client.get('/bucketlists/1', headers={'username':token})
 		self.assertEqual(response.status, '404 NOT FOUND')
+		resp_dict = json.loads(response.data)
+		self.assertEqual(resp_dict.get('message'), 'Bucket of id 1 doesnt exist')
 
-		# create a bucketlist
+		# create a bucketlist to later test put, get(again) and delete methods
 		bucketlist = {
 			'name': self.fake.name()
 		}
@@ -32,56 +48,43 @@ class TestBucketListID(TestBaseClass):
 		resp_dict = json.loads(response.data)
 		bucket_id = resp_dict.get('id')
 
-		# then update it
+		# the put method
 		new_name = self.fake.name()
 		response = self.client.put('/bucketlists/' + str(bucket_id), data={'name':new_name}, headers={'username':token})
 		self.assertEqual(response.status, '200 OK')
 		resp_dict = json.loads(response.data)
 		self.assertTrue(resp_dict.get('name', new_name))
 
-		# then get it
+		# the put method - (non-existent bucketlist)
+		new_name = self.fake.name()
+		response = self.client.put('/bucketlists/2', data={'name':new_name}, headers={'username':token})
+		self.assertEqual(response.status, '404 NOT FOUND')
+		resp_dict = json.loads(response.data)
+		self.assertEqual(resp_dict.get('message'), "That bucket list id doesn't exist")
+
+		# the get method
 		response = self.client.get('/bucketlists/' + str(bucket_id), headers={'username':token})
 		self.assertEqual(response.status, '200 OK')
 		resp_dict = json.loads(response.data)
 		self.assertTrue(resp_dict.get('name', new_name))
 
 
-		# then delete it
+		# the delete method
 		response = self.client.delete('/bucketlists/' + str(bucket_id), headers={'username':token})
 		self.assertEqual(response.status, '200 OK')
 		resp_dict = json.loads(response.data)
 		self.assertTrue(resp_dict.get('message'), 'bucketlist of id ' + str(bucket_id) + ' has been deleted')
 
-		# post method not allowed
-		response = self.client.post('/bucketlists/' + str(bucket_id), data=bucketlist, headers={'username':token})
-		self.assertEqual(response.status, '405 METHOD NOT ALLOWED')
+		# the delete method again (will be non-existent)
+		response = self.client.delete('/bucketlists/' + str(bucket_id), headers={'username':token})
+		self.assertEqual(response.status, '404 NOT FOUND')
 		resp_dict = json.loads(response.data)
-		self.assertTrue(resp_dict.get('message'), 'The method is not allowed for the requested URL.')
+		self.assertTrue(resp_dict.get('message'), "Bucket of id " + str(bucket_id) + " doesn't exist")
 
-	# def test_bucketlist_id_pagination_authorized(self):
-	# 	"""
-	# 	Tests authenticated pagination request to '/bucketlists/<int:id>'.
-	# 	Creates five bucketlists and requests 5 pages from the API.
-	# 	"""
-	# 	# create 5 bucket lists
-	# 	five_bl = []
-	# 	for no in range(5):
-	# 		five_bl.append(dict(name=fake.name()))
-
-	# 	token = register_and_login_user(self.client)
-	# 	# post them to the database
-	# 	for bucketlist in five_bl:
-	# 		self.client.post('/bucketlists/', data=bucketlist, headers={'username':token})
-	# 	# send a paginated get request (one item per page)
-	# 	# response = self.client.get('/bucketlists?limit=1', headers={'username':token})
-	# 	response = get('http://localhost/bucketlists?limit=1', headers={'username': token})
-	# 	# response = self.client.get('/bucketlists?limit=1', headers={'username':token})
-	# 	# iterate through the paged results
-	# 	for no in range(1, 6):
-	# 		response = self.client.get('/bucketlists/page/' + str(no), headers={'username':token})
-	# 		resp_list = json.loads(response.data)
-	# 		# ipdb.set_trace()
-	# 		self.assertEqual(five_bl[no-1].get('name'), resp_list[no-1].get('name'))
-	# 	# check for exception when non-existent is accessed
-	# 	with self.assertRaises(EmptyPage):
-	# 		response = self.client.get('/bucketlists/page/' + str(6), headers={'username':token})
+	def test_bucketlist_id_method_not_allowed(self):
+		"""
+		Test post http method on url '/bucketlists/<int:id>'.
+		"""
+		
+		response = self.client.post('/bucketlists/1')
+		self.assertEqual(response.status, '405 METHOD NOT ALLOWED')

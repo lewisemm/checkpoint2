@@ -275,7 +275,7 @@ class BucketListItems(Resource):
 				item = models.Item(name=name, bucket_id=bucketlist.buck_id)
 				manager.add(item)
 				manager.commit()
-				return marshall(item, self.item_fields), 201
+				return marshal(item, self.item_fields), 201
 			else:
 				return access_denied, 403
 		else:
@@ -371,9 +371,7 @@ api.add_resource(Login, '/auth/login')
 def logout():
 
 	if request.method == 'GET':
-	    # logout_user()
-	    pass
-	return render_template('logout.html', current_user)
-    
+		pass
+	
 if __name__ == '__main__':
 	app.run()
