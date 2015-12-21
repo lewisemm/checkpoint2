@@ -23,6 +23,10 @@ api = Api(app)
 auth = HTTPBasicAuth()
 
 def init_session():
+	"""
+	This method configures and the app's current database and returns a session instance for use
+	during CRUD operations.
+	"""
 	engine = create_engine(app.config.get('DATABASE_URL'))
 	session = sessionmaker()
 	session.configure(bind=engine)
@@ -33,9 +37,17 @@ manager = init_session()
 access_denied = {'message': 'Access denied!'}
 
 def get_request_token():
+	"""
+	This method is used to retrieve a user's token from the username key of the request's header.
+	"""
 	return request.headers.get('username')
 
 def is_bucketlist_owner(bucketlist):
+	"""
+	This method requires a bucketlist as an argument and checks its creator against the currently
+	logged in user. If the current user has the same username as the created_by field of the bucketlist,
+	this method returns True, otherwise, it returns False.
+	"""
 	token = get_request_token()
 	# Ensure the owner od the bucketlist is the only one who can update it
 	if models.User.verify_auth_token(token, manager).username == bucketlist.created_by:
@@ -44,6 +56,10 @@ def is_bucketlist_owner(bucketlist):
 		return False
 
 def paging(fields, paginator, page):
+	"""
+	This method receives field, paginator and page arguments. It uses paginator and page arguments
+	to paginate sqlalchemy query sets. The fields argument is used by marshal to return serialized results.
+	"""
 	try:
 		return marshal(paginator.page(page).object_list, fields), 200 
 	except EmptyPage:
@@ -51,6 +67,12 @@ def paging(fields, paginator, page):
 
 @auth.verify_password
 def verify_password(username_or_token, password):
+	"""
+	The two arguments are not required in this function's body. They are simply there to avoid errors
+	from the Flask-HTTPAuth library.
+	The method is improvised to authenticate users from tokens instead of authentication via sessions
+	as Flask-HTTPAuth originally intented.
+	"""
 	token = get_request_token()
 	if token:
 		user = models.User.verify_auth_token(token, manager)
@@ -64,6 +86,9 @@ def verify_password(username_or_token, password):
 
 class Registration(Resource):
 	def post(self):
+		"""
+		This method facilitates the creation of new users in the Bucketlist API.
+		""" 
 
 		parser = reqparse.RequestParser()
 		parser.add_argument('username')
@@ -91,7 +116,11 @@ class Registration(Resource):
 
 api.add_resource(Registration, '/user/registration')
 
-class Limit():
+class Limit(object):
+	"""
+	This class's attribute helps maintains the limit (content per page limit)
+	across separate client requests.
+	"""
 	limit = 20
 
 
@@ -117,6 +146,9 @@ class BucketList(Resource):
 	
 	@auth.login_required
 	def post(self):
+		"""
+		This method facilitates the creation of new bucketlist items in the Bucketlist API.
+		"""
 		parser = reqparse.RequestParser()
 		parser.add_argument('name')
 
@@ -133,6 +165,11 @@ class BucketList(Resource):
 
 	@auth.login_required
 	def get(self, page=1):
+		"""
+		This method facilitates the retrieval of existing bucketlists from the database.
+		It also allows client specified pagination of results and also has a search bucketlist by name option.
+		The default pagination of results is 20 items per page unless otherwise specified.
+		"""
 		if page < 1 or page > 100:
 				return {'message': 'Page number is out of range (max=100)'}, 403
 		else:
@@ -200,6 +237,9 @@ class BucketListID(Resource):
 
 	@auth.login_required
 	def put(self, id):
+		"""
+		This method facilitates the editing of the properties of the bucketlist of the specified id (i.e. name and date date modified).
+		"""
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 
 		if bucketlist:
@@ -220,6 +260,10 @@ class BucketListID(Resource):
 
 	@auth.login_required
 	def get(self, id):
+		"""
+		This method facilitates the retrieval of the bucketlist of the specified id and its
+		associated items (if any).
+		"""
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
 			return marshal(bucketlist, self.bucketlist_fields), 200
@@ -228,6 +272,10 @@ class BucketListID(Resource):
 	
 	@auth.login_required
 	def delete(self, id):
+		"""
+		This method facilitates the complete removal of the bucketlist of the specified id
+		from the database.
+		"""
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 
 		if bucketlist:
@@ -263,6 +311,9 @@ class BucketListItems(Resource):
 	
 	@auth.login_required
 	def post(self, id):
+		"""
+		This method facilitates the addition of items inside a bucketlist.
+		"""
 		# check if bucketlist exists
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
@@ -297,6 +348,10 @@ class BucketListItemsID(Resource):
 
 	@auth.login_required
 	def put(self, id, item_id):
+		"""
+		This method facilitates the editing of an item of the specified item_id
+		inside a bucketlist of the specified id.
+		"""
 		# check if bucketlist exists
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
@@ -325,6 +380,10 @@ class BucketListItemsID(Resource):
 
 	@auth.login_required
 	def delete(self, id, item_id):
+		"""
+		This method facilitates the complete removal of an item of id item_id from a bucketlist
+		of id id.
+		"""
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
 			if is_bucketlist_owner(bucketlist):
@@ -345,6 +404,10 @@ api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:item_id>')
 
 class Login(Resource):
 	def post(self):
+		"""
+		This method facilitates authentication of existing users and grants access
+		to the Bucketlist API.
+		"""
 		parser = reqparse.RequestParser()
 		parser.add_argument('username')
 		parser.add_argument('password')
