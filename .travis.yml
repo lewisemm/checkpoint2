@@ -1,0 +1,25 @@
+
+language: python
+python:
+  - "2.7"
+
+before_install:
+  - "pip install -r requirements.txt"
+install:
+  - "pip install coveralls"
+script:
+  # - python -m unittest discover tests
+  - coverage run -m unittest discover tests
+after_success:
+  - coveralls
+branches:
+  only:
+  - develop
+  - checkpoint2
+services:
+  - mysql
+env:
+  global:
+    - APP_SETTINGS='config.config.DevelopmentConfig'
+    - SECRET_KEY='This3249jkey123921ijuihisbnsup12wp1w2osejndd2bdsd9i239se5386523cre213tsasd'
+    - DATABASE_URL='mysql://travis:""@127.0.0.1:3306/checkpoint2'
