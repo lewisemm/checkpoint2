@@ -77,7 +77,8 @@ def verify_password(username_or_token, password):
 	if token:
 		user = models.User.verify_auth_token(token, manager)
 		if user:
-			return user
+			if user.is_active:
+				return user
 		else:
 			return False
 	else:
@@ -85,6 +86,9 @@ def verify_password(username_or_token, password):
 
 
 class Registration(Resource):
+	"""
+	The class resource for the '/user/registration' endpoint.
+	"""
 	def post(self):
 		"""
 		This method facilitates the creation of new users in the Bucketlist API.
@@ -119,12 +123,15 @@ api.add_resource(Registration, '/user/registration')
 class Limit(object):
 	"""
 	This class's attribute helps maintains the limit (content per page limit)
-	across separate client requests.
+	across separate client page requests.
 	"""
 	limit = 20
 
 
 class BucketList(Resource):
+	"""
+	The class resource for the '/bucketlists/' and /bucketlists/page/<int:page> endpoints'.
+	"""
 
 	def __init__(self):
 		item_fields = {
@@ -189,7 +196,6 @@ class BucketList(Resource):
 			else:
 				Limit.limit = limit
 		
-
 		current_user = models.User.verify_auth_token(get_request_token(), manager)
 
 		# the "search bucketlist by name" parameter
@@ -214,6 +220,9 @@ api.add_resource(BucketList, '/bucketlists/page/<int:page>', '/bucketlists/')
 
 
 class BucketListID(Resource):
+	"""
+	This is the class resource for the bucketlist of the specified id at '/bucketlists/<int:id>' endpoint.
+	"""
 
 	def __init__(self):
 		item_fields = {
@@ -297,6 +306,9 @@ api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
 
 class BucketListItems(Resource):
+	"""
+	This is the class resource for the '/bucketlists/<int:id>/items/' endpoint.
+	"""
 
 	def __init__(self):
 		self.item_fields = {
@@ -334,6 +346,9 @@ api.add_resource(BucketListItems, '/bucketlists/<int:id>/items/')
 
 
 class BucketListItemsID(Resource):
+	"""
+	This is the class resource for the '/bucketlists/<int:id>/items/<int:item_id>' endpoint.
+	"""
 
 	def __init__(self):
 		self.item_fields = {
@@ -401,6 +416,10 @@ api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:item_id>')
 
 
 class Login(Resource):
+	"""
+	This is the class resource for the '/auth/login' endpoint.
+	"""
+
 	def post(self):
 		"""
 		This method facilitates authentication of existing users and grants access
@@ -419,6 +438,9 @@ class Login(Resource):
 			if user.verify_password(password):
 				token = user.generate_auth_token()
 				decoded = token.decode('ascii')
+				user.is_active = True
+				manager.add(user)
+				manager.commit()
 				return {'token': decoded}, 200
 			else:
 				return {'message': 'Invalid password!'}, 400
@@ -427,12 +449,20 @@ class Login(Resource):
 
 api.add_resource(Login, '/auth/login')
 		
-@app.route('/auth/logout', methods=['GET'])
-@auth.login_required
-def logout():
 
-	if request.method == 'GET':
-		pass
+class Logout(Resource):
+
+	@auth.login_required
+	def get(self):
+		user = models.User.verify_auth_token(get_request_token(), manager)
+		user.is_active = False
+		manager.add(user)
+		manager.commit()
+		return {'message': 'User ' + user.username + ' logged out'}, 200
+
+		
+api.add_resource(Logout, '/auth/logout')
+
 	
 if __name__ == '__main__':
 	app.run()
