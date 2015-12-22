@@ -52,8 +52,7 @@ def is_bucketlist_owner(bucketlist):
 	# Ensure the owner od the bucketlist is the only one who can update it
 	if models.User.verify_auth_token(token, manager).username == bucketlist.created_by:
 		return True
-	else:
-		return False
+	return False
 
 def paging(fields, paginator, page):
 	"""
@@ -79,10 +78,9 @@ def verify_password(username_or_token, password):
 		if user:
 			if user.is_active:
 				return user
-		else:
 			return False
-	else:
 		return False
+	return False
 
 
 class Registration(Resource):
@@ -107,16 +105,17 @@ class Registration(Resource):
 				exists = manager.query(models.User).filter_by(username = username).first()
 				if exists:
 					return {'message': 'User already exists!'}, 403
-			else:
-				return {'message': 'Password missing!'}, 400
-		else:
-			return {'message': 'Username missing!'}, 400
+				user = models.User(username=username)
+				user.hash_password(password)
+				manager.add(user)
+				manager.commit()
+				return {'message': 'User successfully registered!'}, 201
+			# else:
+			return {'message': 'Password missing!'}, 400
+		# else:
+		return {'message': 'Username missing!'}, 400
 		
-		user = models.User(username=username)
-		user.hash_password(password)
-		manager.add(user)
-		manager.commit()
-		return {'message': 'User successfully registered!'}, 201
+		
 
 api.add_resource(Registration, '/user/registration')
 
@@ -206,8 +205,7 @@ class BucketList(Resource):
 				paginator = Paginator(result, Limit.limit)
 				paged_response = paging(self.bucketlist_fields, paginator, page)
 				return paged_response
-			else:
-				return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
+			return {'message': "Bucketlist with name " + q + " doesn't exist"}, 404
 		else:
 			# when no parameter has been specified
 			result = manager.query(models.BucketList).filter_by(created_by=current_user.username).order_by(desc(models.BucketList.date_created))
@@ -260,10 +258,8 @@ class BucketListID(Resource):
 				manager.add(bucketlist)
 				manager.commit()
 				return marshal(bucketlist, self.bucketlist_fields), 200
-			else:
-				return access_denied, 403
-		else:
-			return {'message': "That bucket list id doesn't exist"}, 404
+			return access_denied, 403
+		return {'message': "That bucket list id doesn't exist"}, 404
 
 	@auth.login_required
 	def get(self, id):
@@ -274,8 +270,7 @@ class BucketListID(Resource):
 		bucketlist = manager.query(models.BucketList).filter_by(buck_id=id).first()
 		if bucketlist:
 			return marshal(bucketlist, self.bucketlist_fields), 200
-		else:
-			return {'message': 'Bucket of id ' + str(id) + ' doesnt exist'}, 404
+		return {'message': 'Bucket of id ' + str(id) + ' doesnt exist'}, 404
 	
 	@auth.login_required
 	def delete(self, id):
@@ -297,10 +292,8 @@ class BucketListID(Resource):
 				manager.commit()
 				
 				return {'message': 'Bucket of id ' + str(id) + ' has been deleted'}, 200
-			else:
-				return access_denied, 403
-		else:
-			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
+			return access_denied, 403
+		return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 api.add_resource(BucketListID, '/bucketlists/<int:id>')
 
@@ -337,10 +330,8 @@ class BucketListItems(Resource):
 				manager.add(item)
 				manager.commit()
 				return marshal(item, self.item_fields), 201
-			else:
-				return access_denied, 403
-		else:
-			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
+			return access_denied, 403
+		return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 api.add_resource(BucketListItems, '/bucketlists/<int:id>/items/')
 
@@ -386,10 +377,8 @@ class BucketListItemsID(Resource):
 				manager.add(item)
 				manager.commit()
 				return marshal(item, self.item_fields), 200
-			else:
-				return access_denied, 403
-		else:
-			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
+			return access_denied, 403
+		return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 	@auth.login_required
 	def delete(self, id, item_id):
@@ -405,12 +394,9 @@ class BucketListItemsID(Resource):
 					manager.delete(item)
 					manager.commit()
 					return {'message': 'Item of id ' + str(item_id) + ' in bucketlist of id ' + str(id) + ' has been deleted'}, 200
-				else:
-					return {'message': "Item of id " + str(item_id) + " in bucketlist of id " + str(id) + " doesn't exist"}, 404
-			else:
-				return access_denied, 403
-		else:
-			return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
+				return {'message': "Item of id " + str(item_id) + " in bucketlist of id " + str(id) + " doesn't exist"}, 404
+			return access_denied, 403
+		return {'message': "Bucket of id " + str(id) + " doesn't exist"}, 404
 
 api.add_resource(BucketListItemsID, '/bucketlists/<int:id>/items/<int:item_id>')
 
@@ -442,10 +428,8 @@ class Login(Resource):
 				manager.add(user)
 				manager.commit()
 				return {'token': decoded}, 200
-			else:
-				return {'message': 'Invalid password!'}, 400
-		else:
-			return {'message': 'That username does not exist!'}, 400
+			return {'message': 'Invalid password!'}, 400
+		return {'message': 'That username does not exist!'}, 400
 
 api.add_resource(Login, '/auth/login')
 		
@@ -458,7 +442,7 @@ class Logout(Resource):
 		user.is_active = False
 		manager.add(user)
 		manager.commit()
-		return {'message': 'User ' + user.username + ' logged out'}, 200
+		return {'message': 'User ' + user.username + ' logged out'},
 
 		
 api.add_resource(Logout, '/auth/logout')
