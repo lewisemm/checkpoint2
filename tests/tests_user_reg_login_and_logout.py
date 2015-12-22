@@ -83,5 +83,22 @@ class TestRegistrationLoginLogout(TestBaseClass):
 		self.assertEqual(response.status, '200 OK')
 		self.assertTrue('token' in response.data)
 
+	def test_successful_logout(self):
+		"""
+		Test a successful logout attempt.
+		"""
+
+		token = register_and_login_user(self.client)
+
+		# logout
+		response = self.client.get('/auth/logout', headers={'username': token})
+		self.assertEqual(response.status, '200 OK')
+		self.assertTrue('logged out' in response.data)
+
+		# Try to logout when just logged out
+		response = self.client.get('/auth/logout', headers={'username': token})
+		self.assertEqual(response.status, '401 UNAUTHORIZED')
+		self.assertTrue('Unauthorized Access' in response.data)
+
 if __name__ == '__main__':
 	unittest.main()

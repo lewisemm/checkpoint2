@@ -442,7 +442,7 @@ class Logout(Resource):
 		user.is_active = False
 		manager.add(user)
 		manager.commit()
-		return {'message': 'User ' + user.username + ' logged out'},
+		return {'message': 'User ' + user.username + ' logged out'}, 200
 
 		
 api.add_resource(Logout, '/auth/logout')
