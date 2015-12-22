@@ -17,6 +17,7 @@
    * **`ipdb`** - A Python debugger. It's used to help intercept, understand and detect bugs in code during the development process.
    * **`MySQL-python`** - The Python MySQL connector. This is the package that enables connections to be made to the underlying `MySQL` development database.
    * **`SQLAlchemy-Paginator`** - A pagination library that receives an `sqlalchemy query object` as its first argument and a `limit (results per page in int)` as the second argument and creates a pagination object through which the query's content can be accessed through pages.
+   * **`coverage`** - This package is used to execute the tests. It also generates a test coverage report based on the lines of source code executed from the running tests.
 
 ### Installation
 * Navigate to your directory of choice on terminal.
@@ -36,54 +37,63 @@
 
 ### Routes, Methods and Functionality
 * **`/user/registration`**
-  * Method - POST
+  * Method: POST
     * Creates a new user who can later use the API.
     * Requires `username` and `password` to be provided by the client for creation.
 * **`/auth/login`**
-  * Method - POST
+  * Method: POST
     * Verifies a client's username and password against the values in the database and then generates a token for use in the API if the verification is successful.
     * Requires the client to provide a username and password.
+    * Sets the `is_active` field in the user's model to `True`
 * **`/auth/logout`**
-  * Method - GET
+  * Method: GET
     * Logs a user out.
-    * Still not yet implemented...
+    * Sets the `is_active` field in the user's model to `False`. This invalidates further authentication requests regardless of whether the token is valid.
 * **`/bucketlists/`**
-  * Method - POST
+  * Method: POST
     * Create a new bucket list.
     * Requires the client to provide a bucketlist name.
     * Also requires the client to be authenticated.
-  * Method - GET
+  * Method: GET
     * Lists all the bucket lists that have been created in the API.
     * Requires the client to be authenticated.
 * **`/bucketlists/<id>`**
-  * Method - GET
+  * Method: GET
     * Gets the bucketlist whose id is equivalent to the `<id>` in the URL.
     * Requires the client to be authenticated.
-  * Method - PUT
+  * Method: PUT
     * Updates the bucketlist whose id is equivalent to the `<id>` in the URL.
     * Requires the client to provide a new bucketlist name.
     * Also requires the client to be authenticated.
-  * Method - DELETE
+  * Method: DELETE
     * Deletes the bucketlist whose id is equivalent to the `<id>` in the URL.
     * Requires the client to be authenticated.
 * **`/bucketlists/<id>/items/`**
-  * Method - POST
+  * Method: POST
     * Creates a new item in the bucketlist whose id is equivalent to the `<id>` in the URL.
     * Requires client to provide an item name.
     * Also requires the client to be both authenticated and to be the owner of the bucketlist into which items are being inserted.
 * **`/bucketlists/<id>/items/<item_id>`**
-  * Method - PUT
+  * Method: PUT
     * Updates the item of id `<item_id>` in the bucketlist whose id is equivalent to the `<id>` in the URL.
     * Requires the client to provide the name of the item and/or the done status of the item.
     * Also requires the client to be both authenticated and to be the owner of the bucketlist in which items are being edited.
-  * Method - DELETE
+  * Method: DELETE
     * Deletes the item of id `<item_id>` in the bucketlist whose id is equivalent to the `<id>` in the URL.
     * Requires the client to be both autheticated and to be the owner of the bucketlist from which the item is being deleted.
 
 ### Tests
 * The `tests` have been created using Python's `unittest` module.
+* The `tests` are run with the `coverage` package to enable generation of test coverage reports.
 * To run the tests;
   * Navigate to the project's root directory (where the `requirements.txt` file is located)
   * Run the following command;
-    * `python -m unittest discover tests`
+    * `coverage run -m unittest discover tests`
   * The tests are successful if all of them run with no failures and/or errors.
+  ```shell
+    .............................
+    ----------------------------------------------------------------------
+    Ran 29 tests in 27.776s
+
+    OK
+  ```
